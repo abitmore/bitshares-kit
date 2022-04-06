@@ -19,6 +19,7 @@ object FutureExtensionSerializer : StaticVarSerializer<Unit>(
     )
 )
 
+typealias Vector<T> = @Serializable(with = SortedSetSerializer::class) List<T>
 typealias FlatSet<T> = @Serializable(with = SortedSetSerializer::class) SortedSet<T>
 typealias StatSet<T> = @Serializable(with = SortedSetSerializer::class) SortedSet<T>
 
@@ -56,22 +57,4 @@ typealias ChainIdType = Sha256  //using chain_id_type = fc::sha256;
 //using ratio_type = boost::rational<int32_t>;
 
 //typealias time_point_sec = @Serializable(with = TimePointSecSerializer::class) Instant
-typealias time_point_sec = @Serializable(with = TimePointSecSerializer::class) LocalDateTime
-
-@Serializable(with = OptionalSerializer::class)
-data class Optional<T>(
-    val valueSafe: T? = null
-) {
-    val value get() = valueSafe!!
-    val isPresent get() = valueSafe != null
-
-    override fun toString(): String {
-        return valueSafe.toString()
-    }
-}
-
-fun <T> optional(value: T? = null) = Optional(value)
-
-fun <T> Optional<T>.getOrNull() = valueSafe
-fun <T> Optional<T>.getOrThrow() = value
-fun <T> Optional<T>.getOrElse(fallback: () -> T) = valueSafe ?: fallback()
+typealias time_point_sec = LocalDateTime // TODO: 2022/4/6

@@ -5,7 +5,6 @@ import graphene.protocol.*
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -43,7 +42,7 @@ class ObjectIdSerializer<T: ObjectId> : KSerializer<T> {
         if (encoder is JsonEncoder) {
             encoder.encodeString(value.standardId)
         } else if (encoder is IOEncoder) {
-            encoder.encodeVarLong(value.instance.toLong())
+            encoder.encodeVarInt(value.instance.toLong())
         } else {
             TODO()
         }

@@ -2,6 +2,7 @@ package graphene.serializers
 
 import graphene.protocol.FlatMap
 import graphene.protocol.FlatPair
+import graphene.protocol.Vector
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.*
 import kotlinx.serialization.encoding.*
@@ -139,3 +140,19 @@ class FlatMapSerializer<K: Comparable<K>, V>(
         }
     }
 }
+
+//class VectorSerializer<T: Any>(
+//    private val elementSerializer: KSerializer<T>
+//) : KSerializer<Vector<T>> {
+//    override val descriptor: SerialDescriptor = listSerialDescriptor(elementSerializer.descriptor)
+//    override fun deserialize(decoder: Decoder): Vector<T> {
+//        TODO()
+//    }
+//    override fun serialize(encoder: Encoder, value: Vector<T>) {
+//        val composite = encoder.beginCollection(elementSerializer.descriptor, value.size)
+//        val iterator = value.iterator()
+//        for (index in 0 until value.size)
+//            composite.encodeSerializableElement(descriptor, index, elementSerializer, iterator.next())
+//        composite.endStructure(descriptor)
+//    }
+//}

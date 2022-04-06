@@ -8,6 +8,8 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.encoding.encodeStructure
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonEncoder
 import kotlin.reflect.KClass
 
 fun staticVarSerialDescriptor(
@@ -54,6 +56,37 @@ class StaticVarSerialDescriptor(
     override fun toString(): String = "$serialName($elementDescriptor)"
 }
 
+object VarLongSerializer : KSerializer<Int64> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("VarInt", PrimitiveKind.LONG)
+    override fun serialize(encoder: Encoder, value: Int64) =
+        when (encoder) {
+            is JsonEncoder -> encoder.encodeLong(value)
+            is IOEncoder -> encoder.encodeVarInt(value)
+            else -> TODO()
+        }
+    override fun deserialize(decoder: Decoder): Int64 =
+        when (decoder) {
+            is JsonDecoder -> decoder.decodeLong()
+            else -> TODO()
+        }
+}
+
+object VarIntSerializer : KSerializer<Int32> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("VarInt", PrimitiveKind.LONG)
+    override fun serialize(encoder: Encoder, value: Int32) =
+        when (encoder) {
+            is JsonEncoder -> encoder.encodeInt(value)
+            is IOEncoder -> encoder.encodeVarInt(value)
+            else -> TODO()
+        }
+    override fun deserialize(decoder: Decoder): Int32 =
+        when (decoder) {
+            is JsonDecoder -> decoder.decodeInt()
+            else -> TODO()
+        }
+}
+
+
 // new
 abstract class StaticVarSerializer<T: Any>(
     val typelist: List<KClass<out T>>,
@@ -66,7 +99,7 @@ abstract class StaticVarSerializer<T: Any>(
     }
     override val descriptor: SerialDescriptor = staticVarSerialDescriptor(typelistInternal.first().descriptor) // TODO: 2022/4/6
 
-    private val tagSerializer = Int64.serializer()
+    private val tagSerializer = VarLongSerializer
     fun getSerializer(tag: Int64): KSerializer<T> {
         val clazz: KClass<out T> = typelist[tag.toInt32()]
         @OptIn(InternalSerializationApi::class)

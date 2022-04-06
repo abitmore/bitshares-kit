@@ -25,14 +25,6 @@ class IO : BinaryFormat {
 abstract class IOEncoder : AbstractEncoder() {
     private val headerSizeHint = 0
     protected val builder = BytePacketBuilder(headerSizeHint)
-    private fun Output.writeVarLong(value: Long) {
-        var curr = value
-        while (curr and -0x80L != 0L) {
-            writeByte((curr and 0x7F or 0x80).toByte())
-            curr = curr ushr 7
-        }
-        writeByte((curr and 0x7F).toByte())
-    }
     private fun Output.writeVarInt(value: Int) {
         var curr = value
         while (curr and -0x80 != 0) {
@@ -41,9 +33,17 @@ abstract class IOEncoder : AbstractEncoder() {
         }
         writeByte((curr and 0x7F).toByte())
     }
+    private fun Output.writeVarInt(value: Long) {
+        var curr = value
+        while (curr and -0x80L != 0L) {
+            writeByte((curr and 0x7F or 0x80).toByte())
+            curr = curr ushr 7
+        }
+        writeByte((curr and 0x7F).toByte())
+    }
     fun encodeByteArray(value: ByteArray): Unit = builder.writeFully(value)
     fun encodeVarInt(value: Int): Unit = builder.writeVarInt(value)
-    fun encodeVarLong(value: Long): Unit = builder.writeVarLong(value)
+    fun encodeVarInt(value: Long): Unit = builder.writeVarInt(value)
     override fun beginCollection(descriptor: SerialDescriptor, collectionSize: Int): CompositeEncoder {
         encodeVarInt(collectionSize)
         return super.beginCollection(descriptor, collectionSize)
@@ -52,12 +52,20 @@ abstract class IOEncoder : AbstractEncoder() {
     override fun encodeValue(value: Any) {
         "IOEncoder encodeValue: $value".info()
     }
+
+    override fun encodeElement(descriptor: SerialDescriptor, index: Int): Boolean {
+
+        "IOEncoder encodeElement: $descriptor $index".info()
+
+        return super.encodeElement(descriptor, index)
+    }
 }
 
 @OptIn(ExperimentalSerializationApi::class)
 class LittleEndianEncoder(
     override val serializersModule: SerializersModule,
 ) : IOEncoder() {
+
     override fun encodeBoolean(value: Boolean) = builder.writeByte(if (value) 0x01 else 0x00)
     override fun encodeByte(value: Byte): Unit = builder.writeByte(value)
     override fun encodeShort(value: Short): Unit = builder.writeShortLittleEndian(value)
@@ -71,6 +79,7 @@ class LittleEndianEncoder(
         TODO()
     }
     override fun encodeEnum(enumDescriptor: SerialDescriptor, index: Int): Unit = TODO()
+
 }
 
 

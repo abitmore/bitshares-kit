@@ -5,8 +5,8 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-typealias Restriction = @Serializable(with = ArgumentTypeSerializer::class) Any
 typealias VariantAssertArgumentType = FlatPair<Int64, List<Restriction>>
+typealias Restriction = @Serializable(with = ArgumentTypeSerializer::class) Any
 
 @Serializable
 internal enum class FunctionType {

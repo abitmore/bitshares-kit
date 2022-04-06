@@ -25,10 +25,17 @@ object VoteIdTypeSerializer : KSerializer<VoteIdType> {
 object TimePointSecSerializer: KSerializer<Instant> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("Instant", PrimitiveKind.STRING)
-    override fun deserialize(decoder: Decoder): Instant =
-        decoder.decodeString().toLocalDateTime().toInstant(TimeZone.UTC)
-    override fun serialize(encoder: Encoder, value: Instant) =
-        encoder.encodeString(value.toLocalDateTime(TimeZone.UTC).toString())
+    override fun deserialize(decoder: Decoder): Instant {
+        return decoder.decodeString().toLocalDateTime().toInstant(TimeZone.UTC)
+    }
+    override fun serialize(encoder: Encoder, value: Instant) {
+        val rounded = Instant.fromEpochSeconds(value.epochSeconds)
+        when (encoder) {
+            is JsonEncoder -> encoder.encodeString(rounded.toLocalDateTime(TimeZone.UTC).toString())
+            is IOEncoder -> encoder.encodeInt(rounded.epochSeconds.toInt())
+            else -> throw Error("Operation for $encoder is not implemented.")
+        }
+    }
 }
 
 class OptionalSerializer<T>(

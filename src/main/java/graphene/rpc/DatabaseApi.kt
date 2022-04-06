@@ -3,6 +3,7 @@ package graphene.rpc
 import graphene.app.DatabaseAPI
 import graphene.chain.AbstractObject
 import graphene.protocol.ObjectId
+import graphene.protocol.SignedTransaction
 
 class DatabaseClientAPI(private val client: AbstractClient) {
 
@@ -17,12 +18,16 @@ class DatabaseClientAPI(private val client: AbstractClient) {
         return getObjects(id).firstOrNull()
     }
 
-
-
-
     suspend fun getObjects(ids: List<ObjectId>, subscribe: Boolean): List<AbstractObject?> {
         return client.sendForResult(DatabaseAPI.GET_OBJECTS, ids) ?: emptyList()
     }
+
+    suspend fun getTransactionHex(tx: SignedTransaction): String? {
+        return client.sendForResult(DatabaseAPI.GET_TRANSACTION_HEX, tx)
+    }
+
+
+
 
 
 }
