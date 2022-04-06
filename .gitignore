@@ -1,0 +1,10 @@
+/build
+/src/test/
+*.iml
+local.properties
+.DS_Store
+.externalNativeBuild
+.cxx
+/.idea
+/.gradle
+
