@@ -39,12 +39,10 @@ class ObjectIdSerializer<T: ObjectId> : KSerializer<T> {
     override fun deserialize(decoder: Decoder): T =
         decoder.decodeString().toGrapheneObjectId()
     override fun serialize(encoder: Encoder, value: T) {
-        if (encoder is JsonEncoder) {
-            encoder.encodeString(value.standardId)
-        } else if (encoder is IOEncoder) {
-            encoder.encodeVarInt(value.instance.toLong())
-        } else {
-            TODO()
+        when (encoder) {
+            is JsonEncoder -> encoder.encodeString(value.standardId)
+            is IOEncoder -> encoder.encodeVarInt(value.instance.toLong())
+            else -> TODO()
         }
     }
 }
@@ -54,6 +52,12 @@ object ObjectIdDefaultSerializer : KSerializer<ObjectId> {
     override val descriptor: SerialDescriptor = ID_TYPE_DESCRIPTOR
     override fun deserialize(decoder: Decoder): ObjectId =
         decoder.decodeString().toGrapheneObjectId()
-    override fun serialize(encoder: Encoder, value: ObjectId) = encoder.encodeString(value.standardId)
+    override fun serialize(encoder: Encoder, value: ObjectId) {
+        when (encoder) {
+            is JsonEncoder -> encoder.encodeString(value.standardId)
+            is IOEncoder -> encoder.encodeLong(value.number.toLong())
+            else -> TODO()
+        }
+    }
 }
 

@@ -213,7 +213,7 @@ abstract class AbstractClient {
     inline fun <reified R> decodeParamsFromJsonElement(result: SocketResult) : R? {
         return when (result) {
             is SocketCallback -> GRAPHENE_JSON_PLATFORM_SERIALIZER.decodeFromJsonElement(result.result)
-            is SocketError -> null // throw SocketErrorException(result)
+            is SocketError ->  throw SocketErrorException(result)
             is SocketNotice -> TODO()
         }
     }

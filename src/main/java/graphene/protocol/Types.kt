@@ -3,7 +3,17 @@ package graphene.protocol
 import graphene.serializers.*
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonEncoder
 import java.util.*
 
 // threshold weight
@@ -57,4 +67,21 @@ typealias ChainIdType = Sha256  //using chain_id_type = fc::sha256;
 //using ratio_type = boost::rational<int32_t>;
 
 //typealias time_point_sec = @Serializable(with = TimePointSecSerializer::class) Instant
-typealias time_point_sec = LocalDateTime // TODO: 2022/4/6
+typealias time_point_sec = Instant // TODO: 2022/4/6
+
+object LocalDateTimeSecSerializer: KSerializer<LocalDateTime> {
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("LocalDateTime", PrimitiveKind.STRING)
+    override fun deserialize(decoder: Decoder): LocalDateTime {
+        return decoder.decodeString().toLocalDateTime()
+        TODO()
+    }
+    override fun serialize(encoder: Encoder, value: LocalDateTime) {
+        val rounded = Instant.fromEpochSeconds(value.toInstant(TimeZone.UTC).epochSeconds)
+        when (encoder) {
+            is JsonEncoder -> encoder.encodeString(rounded.toLocalDateTime(TimeZone.UTC).toString())
+            is IOEncoder -> encoder.encodeInt(rounded.epochSeconds.toInt())
+            else -> TODO()
+        }
+    }
+}

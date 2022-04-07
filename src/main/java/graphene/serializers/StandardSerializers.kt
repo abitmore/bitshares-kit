@@ -52,13 +52,15 @@ class OptionalSerializer<T>(
         }
     }
     override fun serialize(encoder: Encoder, value: Optional<T>) {
-        if (encoder is JsonEncoder) {
-            if (value.isPresent) elementSerializer.serialize(encoder, value.value)
-        } else if (encoder is IOEncoder) {
-            encoder.encodeBoolean(value.isPresent)
-            if (value.isPresent) elementSerializer.serialize(encoder, value.value)
-        } else {
-            TODO()
+        when (encoder) {
+            is JsonEncoder -> if (value.isPresent) elementSerializer.serialize(encoder, value.value)
+            is IOEncoder -> {
+                encoder.encodePresence(value.isPresent)
+                if (value.isPresent) elementSerializer.serialize(encoder, value.value)
+            }
+            else -> {
+                TODO()
+            }
         }
     }
 

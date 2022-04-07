@@ -1,13 +1,14 @@
 @file:Suppress("SERIALIZER_TYPE_INCOMPATIBLE")
 package graphene.protocol
 
+import graphene.serializers.ObjectIdDefaultSerializer
 import graphene.serializers.ObjectIdSerializer
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 private fun throwNIE(): Nothing = throw NotImplementedError()
 
-@Serializable(with = ObjectIdSerializer::class)
+@Serializable(with = ObjectIdDefaultSerializer::class)
 interface ObjectIdType: Comparable<ObjectIdType> {
     val id: ObjectId
     val space: ObjectSpace

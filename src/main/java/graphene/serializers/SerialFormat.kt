@@ -4,7 +4,7 @@ import kotlinx.io.core.ByteOrder
 import kotlinx.serialization.json.*
 
 var GRAPHENE_JSON_PLATFORM_SERIALIZER = Json {
-    ignoreUnknownKeys = true
+    ignoreUnknownKeys = false
     encodeDefaults = true
 }
 

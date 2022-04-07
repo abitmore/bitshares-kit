@@ -3,6 +3,11 @@ package graphene.protocol
 import graphene.serializers.*
 import kotlinx.datetime.Instant
 import kotlinx.serialization.*
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.encoding.encodeStructure
+import kotlinx.serialization.json.JsonEncoder
 import java.util.*
 
 internal val bytesComparator = Comparator<ByteArray> { o1, o2 ->
@@ -20,8 +25,25 @@ internal val bytesComparator = Comparator<ByteArray> { o1, o2 ->
     return@Comparator o1.size - o2.size
 }
 
+@InheritableSerialInfo
+annotation class SerializeIndex
+
+@Serializable(with = ExtensionSerializer::class) @SerializeIndex
 interface Extension<T> : GrapheneComponent
 
+class ExtensionSerializer<T: Extension<T>>(val elementSerializer: KSerializer<T>) : KSerializer<Extension<T>> {
+    override val descriptor: SerialDescriptor = elementSerializer.descriptor
+    override fun deserialize(decoder: Decoder): Extension<T> {
+        return elementSerializer.deserialize(decoder)
+    }
+    override fun serialize(encoder: Encoder, value: Extension<T>) {
+        when (encoder) {
+            is JsonEncoder -> elementSerializer.serialize(encoder, value as T)
+            is IOEncoder -> elementSerializer.serialize(encoder, value as T)
+        }
+    }
+
+}
 
 
 typealias OperationResult = @Serializable(with = OperationResultSerializer::class) Any

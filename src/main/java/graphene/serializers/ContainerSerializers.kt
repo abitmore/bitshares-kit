@@ -7,6 +7,7 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.*
 import kotlinx.serialization.encoding.*
 import kotlinx.serialization.encoding.CompositeDecoder.Companion.DECODE_DONE
+import kotlinx.serialization.json.*
 import java.util.*
 import kotlin.Comparator
 
@@ -102,11 +103,24 @@ class SortedSetSerializer<T: Any>(
         }
     }
     override fun serialize(encoder: Encoder, value: SortedSet<T>) {
-        val composite = encoder.beginCollection(elementSerializer.descriptor, value.size)
-        val iterator = value.iterator()
-        for (index in 0 until value.size)
-            composite.encodeSerializableElement(descriptor, index, elementSerializer, iterator.next())
-        composite.endStructure(descriptor)
+        when (encoder) {
+            is JsonEncoder -> {
+                encoder.encodeJsonElement(
+                    buildJsonArray {
+                        value.forEach { add(encoder.json.encodeToJsonElement(elementSerializer, it)) }
+                    }
+                )
+            }
+            is IOEncoder -> {
+                val composite = encoder.beginCollection(elementSerializer.descriptor, value.size)
+                val iterator = value.iterator()
+                for (index in 0 until value.size)
+                    composite.encodeSerializableElement(descriptor, index, elementSerializer, iterator.next())
+                composite.endStructure(descriptor)
+            }
+            else -> TODO()
+        }
+
     }
 }
 
@@ -116,43 +130,49 @@ class FlatMapSerializer<K: Comparable<K>, V>(
 ) : KSerializer<FlatMap<K, V>> {
 
     private val elementSerializer = FlatPairSerializer(keySerializer, valueSerializer)
-
     override val descriptor: SerialDescriptor = listSerialDescriptor(elementSerializer.descriptor)
     override fun deserialize(decoder: Decoder): FlatMap<K, V> {
-        return decoder.decodeStructure(descriptor) {
-            val map = sortedMapOf<K, V>()
-            while (true) {
-                val index = decodeElementIndex(descriptor)
-                if (index == DECODE_DONE) break
-                val value = decodeSerializableElement(elementSerializer.descriptor, index, elementSerializer)
-                map.put(value.first, value.second)
+        return when (decoder) {
+            is JsonDecoder -> {
+                decoder.decodeJsonElement().jsonArray.associate {
+                    decoder.json.decodeFromJsonElement(elementSerializer, it)
+                }.toSortedMap()
             }
-            map
+            else -> {
+                decoder.decodeStructure(descriptor) {
+                    val map = sortedMapOf<K, V>()
+                    while (true) {
+                        val index = decodeElementIndex(descriptor)
+                        if (index == DECODE_DONE) break
+                        val value = decodeSerializableElement(elementSerializer.descriptor, index, elementSerializer)
+                        map[value.first] = value.second
+                    }
+                    map
+                }
+                TODO()
+            }
         }
     }
     override fun serialize(encoder: Encoder, value: FlatMap<K, V>) {
-        val size = value.size
-        encoder.encodeCollection(descriptor, size) {
-            var index = 0
-            value.forEach {
-                encodeSerializableElement(descriptor, index++, elementSerializer, it.toPair())
+        when (encoder) {
+            is JsonEncoder -> encoder.encodeJsonElement(
+                buildJsonArray {
+                    value.forEach {
+                        add(encoder.json.encodeToJsonElement(elementSerializer, it.toPair()))
+                    }
+                }
+            )
+            is IOEncoder -> {
+                val size = value.size
+                encoder.encodeCollection(descriptor, size) {
+                    var index = 0
+                    value.forEach {
+                        encodeSerializableElement(descriptor, index++, elementSerializer, it.toPair())
+                    }
+                }
             }
+            else -> TODO()
         }
+
     }
 }
-
-//class VectorSerializer<T: Any>(
-//    private val elementSerializer: KSerializer<T>
-//) : KSerializer<Vector<T>> {
-//    override val descriptor: SerialDescriptor = listSerialDescriptor(elementSerializer.descriptor)
-//    override fun deserialize(decoder: Decoder): Vector<T> {
-//        TODO()
-//    }
-//    override fun serialize(encoder: Encoder, value: Vector<T>) {
-//        val composite = encoder.beginCollection(elementSerializer.descriptor, value.size)
-//        val iterator = value.iterator()
-//        for (index in 0 until value.size)
-//            composite.encodeSerializableElement(descriptor, index, elementSerializer, iterator.next())
-//        composite.endStructure(descriptor)
-//    }
-//}

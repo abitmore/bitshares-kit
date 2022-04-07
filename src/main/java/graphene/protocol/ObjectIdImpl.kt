@@ -1,10 +1,11 @@
 @file:Suppress("SERIALIZER_TYPE_INCOMPATIBLE")
 package graphene.protocol
 
+import graphene.serializers.ObjectIdDefaultSerializer
 import graphene.serializers.ObjectIdSerializer
 import kotlinx.serialization.Serializable
 
-@Serializable(with = ObjectIdSerializer::class)
+@Serializable(with = ObjectIdDefaultSerializer::class)
 sealed class ObjectId(
     final override val space: ObjectSpace,
     final override val type: ObjectType,

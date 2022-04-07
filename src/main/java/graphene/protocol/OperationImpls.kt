@@ -1,8 +1,9 @@
 package graphene.protocol
 
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import graphene.serializers.ObjectIdDefaultSerializer
+import graphene.serializers.TimePointSecSerializer
+import kotlinx.datetime.Instant
+import kotlinx.serialization.*
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
@@ -28,7 +29,8 @@ data class LimitOrderCreateOperation(
     val seller: AccountIdType,
     val amount_to_sell: Asset,
     val min_to_receive: Asset,
-    val expiration: time_point_sec, // = MAXIMUM // The order will be removed from the books if not filled by expiration // Upon expiration, all unsold asset will be returned to seller
+    @Serializable(with = TimePointSecSerializer::class)
+    val expiration: Instant, // = MAXIMUM // The order will be removed from the books if not filled by expiration // Upon expiration, all unsold asset will be returned to seller
     val fill_or_kill: Boolean = false,  // If this flag is set the entire order must be filled or the operation is rejected
     val extensions: ExtensionsType,
 ) : Operation()
@@ -37,8 +39,8 @@ data class LimitOrderCreateOperation(
 @Serializable
 data class LimitOrderCancelOperation(
     val fee: Asset,
-    val order: LimitOrderIdType,
     val fee_paying_account: AccountIdType, // must be order->seller
+    val order: LimitOrderIdType,
     val extensions: ExtensionsType,
 ) : Operation()
 
@@ -61,11 +63,11 @@ data class CallOrderUpdateOperation(
 /*  4 */
 @Serializable
 data class FillOrderOperation(
+    val fee: Asset, // paid by receiving account
     val order_id: ObjectIdType,
     val account_id: AccountIdType,
     val pays: Asset,
     val receives: Asset,
-    val fee: Asset, // paid by receiving account
     val fill_price: PriceType,
     val is_maker: Boolean,
 ) : Operation()           // Virtual
@@ -302,7 +304,8 @@ data class ProposalCreateOperation(
     val fee: Asset,
     val fee_paying_account: AccountIdType,
     val proposed_ops: List<OperationWrapper>,
-    val expiration_time: time_point_sec,
+    @Serializable(with = TimePointSecSerializer::class)
+    val expiration_time: Instant,
     val review_period_seconds: Optional<UInt32> = optional(),
     val extensions: ExtensionsType,
 ) : Operation()
@@ -341,6 +344,7 @@ data class WithdrawPermissionCreateOperation(
     val withdrawal_limit: Asset, // The maximum amount authorized_account is allowed to withdraw in a given withdrawal period
     val withdrawal_period_sec: UInt32, // = 0 // Length of the withdrawal period in seconds
     val periods_until_expiration: UInt32, // = 0 // The number of withdrawal periods this permission is valid for
+    @Serializable(with = TimePointSecSerializer::class)
     val period_start_time: time_point_sec, // Time at which the first withdrawal period begins; must be in the future
 ) : Operation()
 /* 26 */ 
@@ -352,6 +356,7 @@ data class WithdrawPermissionUpdateOperation(
     val permission_to_update: WithdrawPermissionIdType, // ID of the permission which is being updated
     val withdrawal_limit: Asset, // New maximum amount the withdrawer is allowed to charge per withdrawal period
     val withdrawal_period_sec: UInt32, // = 0 // New length of the period between withdrawals
+    @Serializable(with = TimePointSecSerializer::class)
     val period_start_time: time_point_sec, // New beginning of the next withdrawal period; must be in the future
     val periods_until_expiration: UInt32, // = 0 // The new number of withdrawal periods for which this permission will be valid
 ) : Operation()
@@ -430,7 +435,9 @@ data class VestingBalanceWithdrawOperation(
 data class WorkerCreateOperation(
     val fee: Asset,
     val owner: AccountIdType,
+    @Serializable(with = TimePointSecSerializer::class)
     val work_begin_date: time_point_sec,
+    @Serializable(with = TimePointSecSerializer::class)
     val work_end_date: time_point_sec,
     val daily_pay: ShareType,
     val name: String,
@@ -656,7 +663,9 @@ data class CustomAuthorityCreateOperation(
     val fee: Asset,
     val account: AccountIdType, // Account which is setting the custom authority; also pays the fee
     val enabled: Boolean, // Whether the custom authority is enabled or not
+    @Serializable(with = TimePointSecSerializer::class)
     val valid_from: time_point_sec, // Date when custom authority becomes active
+    @Serializable(with = TimePointSecSerializer::class)
     val valid_to: time_point_sec, // Expiration date for custom authority
     val operation_type: UnsignedInt, // Tag of the operation this custom authority can authorize
     val auth: Authority, // Authentication requirements for the custom authority
@@ -671,8 +680,8 @@ data class CustomAuthorityUpdateOperation(
     val account: AccountIdType, // Account which owns the custom authority to update; also pays the fee
     val authority_to_update: CustomAuthorityIdType, // ID of the custom authority to update
     val new_enabled: Optional<Boolean> = optional(), // Change to whether the custom authority is enabled or not
-    val new_valid_from: Optional<time_point_sec> = optional(), // Change to the custom authority begin date
-    val new_valid_to: Optional<time_point_sec> = optional(), // Change to the custom authority expiration date
+    val new_valid_from: Optional<@Serializable(with = TimePointSecSerializer::class) time_point_sec> = optional(), // Change to the custom authority begin date
+    val new_valid_to: Optional<@Serializable(with = TimePointSecSerializer::class) time_point_sec> = optional(), // Change to the custom authority expiration date
     val new_auth: Optional<Authority> = optional(), // Change to the authentication for the custom authority
     val restrictions_to_remove: FlatSet<UInt16>, // Set of IDs of restrictions to remove
     val restrictions_to_add: List<Restriction>, // Vector of new restrictions
@@ -828,6 +837,7 @@ data class CreditOfferCreateOperation(
     val max_duration_seconds: UInt32, // = 0 // The time limit that borrowed funds should be repaid
     val min_deal_amount: ShareType, // Minimum amount to borrow for each new deal
     val enabled: Boolean, // = false // Whether this offer is available
+    @Serializable(with = TimePointSecSerializer::class)
     val auto_disable_time: time_point_sec, // The time when this offer will be disabled automatically
     val acceptable_collateral: FlatMap<AssetIdType, PriceType>, // Types and rates of acceptable collateral
     val acceptable_borrowers: FlatMap<AccountIdType, ShareType>, // Allowed borrowers and their maximum amounts to borrow. No limitation if empty.
@@ -854,7 +864,7 @@ data class CreditOfferUpdateOperation(
     val max_duration_seconds: Optional<UInt32> = optional(), // New repayment time limit, optional
     val min_deal_amount: Optional<ShareType> = optional(), // Minimum amount to borrow for each new deal, optional
     val enabled: Optional<Boolean> = optional(), // Whether this offer is available, optional
-    val auto_disable_time: Optional<time_point_sec>, // New time to disable automatically, optional
+    val auto_disable_time: Optional<@Serializable(with = TimePointSecSerializer::class) Instant>, // New time to disable automatically, optional
     val acceptable_collateral: Optional<FlatMap<AssetIdType, PriceType>> = optional(), // New types and rates of acceptable collateral, optional
     val acceptable_borrowers: Optional<FlatMap<AccountIdType, ShareType>> = optional(), // New allowed borrowers and their maximum amounts to borrow, optional
     val extensions: ExtensionsType, // Unused. Reserved for future use.
