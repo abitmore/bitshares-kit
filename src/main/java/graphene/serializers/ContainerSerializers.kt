@@ -86,7 +86,7 @@ class FlatPairSerializer<A, B>(
 class SortedSetSerializer<T: Any>(
     private val elementSerializer: KSerializer<T>
 ) : KSerializer<SortedSet<T>> {
-    override val descriptor: SerialDescriptor = setSerialDescriptor(elementSerializer.descriptor)
+    override val descriptor: SerialDescriptor = listSerialDescriptor(elementSerializer.descriptor)
     override fun deserialize(decoder: Decoder): SortedSet<T> {
         return decoder.decodeStructure(descriptor) {
             val set = if (elementSerializer is StaticVarSerializer) {
@@ -112,10 +112,10 @@ class SortedSetSerializer<T: Any>(
                 )
             }
             is IOEncoder -> {
-                val composite = encoder.beginCollection(elementSerializer.descriptor, value.size)
+                val composite = encoder.beginCollection(descriptor, value.size)
                 val iterator = value.iterator()
                 for (index in 0 until value.size)
-                    composite.encodeSerializableElement(descriptor, index, elementSerializer, iterator.next())
+                    composite.encodeSerializableElement(elementSerializer.descriptor, index, elementSerializer, iterator.next())
                 composite.endStructure(descriptor)
             }
             else -> TODO()

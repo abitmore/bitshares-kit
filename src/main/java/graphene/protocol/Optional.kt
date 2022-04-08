@@ -9,6 +9,7 @@ data class Optional<T>(
 ) {
     val value get() = valueSafe!!
     val isPresent get() = valueSafe != null
+//            && !(value is Collection<*> && (value as Collection<*>).isEmpty())
 
     override fun toString(): String {
         return valueSafe.toString()

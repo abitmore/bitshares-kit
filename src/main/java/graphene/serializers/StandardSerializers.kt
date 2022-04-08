@@ -14,12 +14,16 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonEncoder
 
 object VoteIdTypeSerializer : KSerializer<VoteIdType> {
-    override val descriptor: SerialDescriptor =
-        PrimitiveSerialDescriptor("VoteIdType", PrimitiveKind.STRING)
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("VoteIdType", PrimitiveKind.STRING)
     override fun deserialize(decoder: Decoder): VoteIdType =
         decoder.decodeString().run { VoteIdType.fromStringId(this) }
-    override fun serialize(encoder: Encoder, value: VoteIdType) =
-        encoder.encodeString(value.toString())
+    override fun serialize(encoder: Encoder, value: VoteIdType) {
+        when (encoder) {
+            is JsonEncoder -> encoder.encodeString(value.toString())
+            else -> TODO()
+        }
+    }
+
 }
 
 object TimePointSecSerializer: KSerializer<Instant> {
