@@ -15,30 +15,30 @@ sealed class HtlcHash
 
 @Serializable(with = HtlcAlgoRipemd160Serializer::class)
 data class HtlcAlgoRipemd160(
-    val hash: String
+    val hash: Ripemd160
 ): HtlcHash() {
-    override fun toString(): String = hash
+    override fun toString(): String = hash.toString()
 }
 
 @Serializable(with = HtlcAlgoSha1Serializer::class)
 data class HtlcAlgoSha1(
-    val hash: String
+    val hash: Sha1
 ): HtlcHash() {
-    override fun toString(): String = hash
+    override fun toString(): String = hash.toString()
 }
 
 @Serializable(with = HtlcAlgoSha256Serializer::class)
 data class HtlcAlgoSha256(
-    val hash: String
+    val hash: Sha256
 ): HtlcHash() {
-    override fun toString(): String = hash
+    override fun toString(): String = hash.toString()
 }
 
 @Serializable(with = HtlcAlgoHash160Serializer::class)
 data class HtlcAlgoHash160(
-    val hash: String
+    val hash: Hash160
 ): HtlcHash() {
-    override fun toString(): String = hash
+    override fun toString(): String = hash.toString()
 }
 
 object HtlcHashSerializer : StaticVarSerializer<HtlcHash>(
@@ -52,32 +52,28 @@ object HtlcHashSerializer : StaticVarSerializer<HtlcHash>(
 
 object HtlcAlgoRipemd160Serializer: KSerializer<HtlcAlgoRipemd160> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("HtlcAlgoRipemd160", PrimitiveKind.STRING)
-    override fun serialize(encoder: Encoder, value: HtlcAlgoRipemd160) =
-        encoder.encodeString(value.toString())
-    override fun deserialize(decoder: Decoder): HtlcAlgoRipemd160 =
-        HtlcAlgoRipemd160(decoder.decodeString())
+    private val elementSerializer = Ripemd160.serializer()
+    override fun serialize(encoder: Encoder, value: HtlcAlgoRipemd160) = elementSerializer.serialize(encoder, value.hash)
+    override fun deserialize(decoder: Decoder): HtlcAlgoRipemd160 = HtlcAlgoRipemd160(elementSerializer.deserialize(decoder))
 }
 
 object HtlcAlgoSha1Serializer: KSerializer<HtlcAlgoSha1> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("HtlcAlgoSha1", PrimitiveKind.STRING)
-    override fun serialize(encoder: Encoder, value: HtlcAlgoSha1) =
-        encoder.encodeString(value.toString())
-    override fun deserialize(decoder: Decoder): HtlcAlgoSha1 =
-        HtlcAlgoSha1(decoder.decodeString())
+    private val elementSerializer = Sha1.serializer()
+    override fun serialize(encoder: Encoder, value: HtlcAlgoSha1) = elementSerializer.serialize(encoder, value.hash)
+    override fun deserialize(decoder: Decoder): HtlcAlgoSha1 = HtlcAlgoSha1(elementSerializer.deserialize(decoder))
 }
 
 object HtlcAlgoSha256Serializer: KSerializer<HtlcAlgoSha256> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("HtlcAlgoSha256", PrimitiveKind.STRING)
-    override fun serialize(encoder: Encoder, value: HtlcAlgoSha256) =
-        encoder.encodeString(value.toString())
-    override fun deserialize(decoder: Decoder): HtlcAlgoSha256 =
-        HtlcAlgoSha256(decoder.decodeString())
+    private val elementSerializer = Sha256.serializer()
+    override fun serialize(encoder: Encoder, value: HtlcAlgoSha256) = elementSerializer.serialize(encoder, value.hash)
+    override fun deserialize(decoder: Decoder): HtlcAlgoSha256 = HtlcAlgoSha256(elementSerializer.deserialize(decoder))
 }
 
 object HtlcAlgoHash160Serializer: KSerializer<HtlcAlgoHash160> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("HtlcAlgoHash160", PrimitiveKind.STRING)
-    override fun serialize(encoder: Encoder, value: HtlcAlgoHash160) =
-        encoder.encodeString(value.toString())
-    override fun deserialize(decoder: Decoder): HtlcAlgoHash160 =
-        HtlcAlgoHash160(decoder.decodeString())
+    private val elementSerializer = Hash160.serializer()
+    override fun serialize(encoder: Encoder, value: HtlcAlgoHash160) = elementSerializer.serialize(encoder, value.hash)
+    override fun deserialize(decoder: Decoder): HtlcAlgoHash160 = HtlcAlgoHash160(elementSerializer.deserialize(decoder))
 }

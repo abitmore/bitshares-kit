@@ -6,10 +6,13 @@ package graphene.extension
 @Deprecated("") fun ByteArray?.orEmpty(): ByteArray = this ?: byteArrayOf()
 @Deprecated("") fun String?.toHexByteArrayOrEmpty() = this?.toHexByteArray() ?: byteArrayOf()
 
-fun String.toUnicodeByteArray() = this.toByteArray(Charsets.UTF_8)
-fun ByteArray.toUnicodeString() = this.toString(Charsets.UTF_8)
+fun String.toUnicodeByteArray() = toByteArray(Charsets.UTF_8)
+fun ByteArray.toUnicodeString() = toString(Charsets.UTF_8)
+
 fun String.toHexByteArray() = chunked(2).map { it.toInt(16).toByte() }.toByteArray()
 fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
+
+
 
 //internal const val EMPTY_SPACE = ""
 internal const val BLANK_SPACE = " "

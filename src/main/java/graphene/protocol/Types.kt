@@ -1,5 +1,9 @@
 package graphene.protocol
 
+import graphene.extension.sha256
+import graphene.extension.sha512
+import graphene.extension.toHexByteArray
+import graphene.extension.toHexString
 import graphene.serializers.*
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
@@ -13,13 +17,13 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonEncoder
 import java.util.*
 
 // threshold weight
 
-typealias ExtensionsType = StatSet<FutureExtensions>
-typealias FutureExtensions = @Serializable(with = FutureExtensionSerializer::class) Unit
+typealias FutureExtensions = StatSet<@Serializable(with = FutureExtensionSerializer::class) Unit>
 
 fun emptyExtension() = sortedSetOf<Unit>()
 
@@ -39,9 +43,8 @@ typealias FlatPair<A, B> = @Serializable(with = FlatPairSerializer::class) Pair<
 
 typealias PriceFeeds = FlatMap<AccountId, FlatPair<@Serializable(TimePointSecSerializer::class) Instant, PriceFeedWithIcr>>
 
-
-typealias Ripemd160 = String
-typealias Sha256 = String
+//typealias Ripemd160 = String
+//typealias Sha256 = String
 
 typealias BlockIdType = Ripemd160 //typealias block_id_type = fc::ripemd160; TODO
 typealias ChecksumType = Ripemd160 //typealias checksum_type = fc::ripemd160; TODO
@@ -52,14 +55,14 @@ typealias ShareType = Int64 //typealias share_type = safe<int64_t>; TODO
 typealias WeightType = UInt16 //typealias weight_type = uint16_t; TODO
 
 // crypto
-typealias BlindFactorType = Sha256 //typedef fc::sha256                               blind_factor_type;
+typealias BlindFactorType = Sha256 //typedef fc::sha256 blind_factor_type; TODO
 typealias CommitmentType = String //typedef zero_initialized_array<unsigned char,33> commitment_type;
 //typedef zero_initialized_array<unsigned char,33> public_key_data;
 //typedef fc::sha256                               private_key_secret;
 //typedef zero_initialized_array<unsigned char,65> public_key_point_data; ///< the full non-compressed version of the ECC point
 //typedef zero_initialized_array<unsigned char,72> signature;
 //typedef zero_initialized_array<unsigned char,65> compact_signature;
-typealias RangeProofType = List<Char> //typedef std::vector<char>                        range_proof_type;
+typealias RangeProofType = BinaryData //typedef std::vector<char>                        range_proof_type;
 //typedef zero_initialized_array<unsigned char,78> extended_key_data;
 
 //using private_key_type = fc::ecc::private_key;
@@ -68,6 +71,7 @@ typealias ChainIdType = Sha256  //using chain_id_type = fc::sha256;
 
 //typealias time_point_sec = @Serializable(with = TimePointSecSerializer::class) Instant
 typealias time_point_sec = Instant // TODO: 2022/4/6
+
 
 object LocalDateTimeSecSerializer: KSerializer<LocalDateTime> {
     override val descriptor: SerialDescriptor =
@@ -84,4 +88,156 @@ object LocalDateTimeSecSerializer: KSerializer<LocalDateTime> {
             else -> TODO()
         }
     }
+}
+
+@Serializable(with = Ripemd160Serializer::class)
+class Ripemd160(data: ByteArray) : BinaryData(data) {
+    init {
+        require(data.size == 20)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as Ripemd160
+        if (!data.contentEquals(other.data)) return false
+        return true
+    }
+    override fun hashCode(): Int = data.contentHashCode()
+    override fun toString(): String = data.toHexString()
+}
+object Ripemd160Serializer : KSerializer<Ripemd160> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Ripemd160", PrimitiveKind.STRING)
+    override fun deserialize(decoder: Decoder): Ripemd160 =
+        when (decoder) {
+            is JsonDecoder -> Ripemd160(decoder.decodeString().toHexByteArray())
+            else -> TODO()
+        }
+    override fun serialize(encoder: Encoder, value: Ripemd160) =
+        when (encoder) {
+            is JsonEncoder -> encoder.encodeString(value.data.toHexString())
+            is IOEncoder -> encoder.encodeByteArray(value.data)
+            else -> TODO()
+        }
+}
+
+
+@Serializable(with = Sha1Serializer::class)
+class Sha1(data: ByteArray) : BinaryData(data) {
+    init {
+        require(data.size == 20)
+    }
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as Sha1
+        if (!data.contentEquals(other.data)) return false
+        return true
+    }
+    override fun hashCode(): Int = data.contentHashCode()
+    override fun toString(): String = data.toHexString()
+}
+object Sha1Serializer : KSerializer<Sha1> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Sha1", PrimitiveKind.STRING)
+    override fun deserialize(decoder: Decoder): Sha1 =
+        when (decoder) {
+            is JsonDecoder -> Sha1(decoder.decodeString().toHexByteArray())
+            else -> TODO()
+        }
+    override fun serialize(encoder: Encoder, value: Sha1) =
+        when (encoder) {
+            is JsonEncoder -> encoder.encodeString(value.data.toHexString())
+            is IOEncoder -> encoder.encodeByteArray(value.data)
+            else -> TODO()
+        }
+}
+
+@Serializable(with = Sha256Serializer::class)
+class Sha256(data: ByteArray) : BinaryData(data) {
+    init {
+        require(data.size == 32)
+    }
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as Sha256
+        if (!data.contentEquals(other.data)) return false
+        return true
+    }
+    override fun hashCode(): Int = data.contentHashCode()
+    override fun toString(): String = data.toHexString()
+}
+object Sha256Serializer : KSerializer<Sha256> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Sha256", PrimitiveKind.STRING)
+    override fun deserialize(decoder: Decoder): Sha256 =
+        when (decoder) {
+            is JsonDecoder -> Sha256(decoder.decodeString().toHexByteArray())
+            else -> TODO()
+        }
+    override fun serialize(encoder: Encoder, value: Sha256) =
+        when (encoder) {
+            is JsonEncoder -> encoder.encodeString(value.data.toHexString())
+            is IOEncoder -> encoder.encodeByteArray(value.data)
+            else -> TODO()
+        }
+}
+
+@Serializable(with = Sha256Serializer::class)
+class Hash160(data: ByteArray) : BinaryData(data) {
+    init {
+        require(data.size == 32)
+    }
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as Hash160
+        if (!data.contentEquals(other.data)) return false
+        return true
+    }
+    override fun hashCode(): Int = data.contentHashCode()
+    override fun toString(): String = data.toHexString()
+}
+object Hash160Serializer : KSerializer<Hash160> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Hash160", PrimitiveKind.STRING)
+    override fun deserialize(decoder: Decoder): Hash160 =
+        when (decoder) {
+            is JsonDecoder -> Hash160(decoder.decodeString().toHexByteArray())
+            else -> TODO()
+        }
+    override fun serialize(encoder: Encoder, value: Hash160) =
+        when (encoder) {
+            is JsonEncoder -> encoder.encodeString(value.data.toHexString())
+            is IOEncoder -> encoder.encodeByteArray(value.data)
+            else -> TODO()
+        }
+}
+
+@Serializable(with = BinaryDataSerializer::class)
+open class BinaryData(val data: ByteArray) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as BinaryData
+        if (!data.contentEquals(other.data)) return false
+        return true
+    }
+    override fun hashCode(): Int = data.contentHashCode()
+    override fun toString(): String = data.toHexString()
+}
+object BinaryDataSerializer : KSerializer<BinaryData> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("BinaryData", PrimitiveKind.STRING)
+    override fun deserialize(decoder: Decoder): BinaryData =
+        when (decoder) {
+            is JsonDecoder -> BinaryData(decoder.decodeString().toHexByteArray())
+            else -> TODO()
+        }
+    override fun serialize(encoder: Encoder, value: BinaryData) =
+        when (encoder) {
+            is JsonEncoder -> encoder.encodeString(value.data.toHexString())
+            is IOEncoder -> {
+                encoder.encodeVarInt(value.data.size)
+                encoder.encodeByteArray(value.data)
+            }
+            else -> TODO()
+        }
 }

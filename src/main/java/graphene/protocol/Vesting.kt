@@ -1,6 +1,7 @@
 package graphene.protocol
 
 import graphene.serializers.StaticVarSerializer
+import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -10,7 +11,7 @@ sealed class VestingPolicyInitializer
 @Serializable
 data class LinearVestingPolicyInitializer(
     /** while vesting begins on begin_timestamp, none may be claimed before vesting_cliff_seconds have passed  */
-    @SerialName("begin_timestamp") val beginTimestamp: time_point_sec,
+    @SerialName("begin_timestamp") val beginTimestamp: Instant,
     @SerialName("vesting_cliff_seconds") val vestingCliffSeconds: UInt32, // = 0
     @SerialName("vesting_duration_seconds") val vestingDurationSeconds: UInt32, // = 0
 ) : VestingPolicyInitializer()
@@ -18,7 +19,7 @@ data class LinearVestingPolicyInitializer(
 @Serializable
 data class CddVestingPolicyInitializer(
     /** while coindays may accrue over time, none may be claimed before the start_claim time  */
-    @SerialName("start_claim") val startClaim: time_point_sec,
+    @SerialName("start_claim") val startClaim: Instant,
     @SerialName("vesting_seconds") val vestingSeconds: UInt32, // = 0
 ) : VestingPolicyInitializer()
 

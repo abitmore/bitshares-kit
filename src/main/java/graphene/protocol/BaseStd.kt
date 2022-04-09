@@ -1,5 +1,7 @@
 package graphene.protocol
 
+import graphene.serializers.ULongVarIntSerializer
+import graphene.serializers.VarLongSerializer
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -13,7 +15,7 @@ typealias UInt8  = UByte
 typealias UInt16 = UShort
 typealias UInt32 = UInt
 typealias UInt64 = ULong
-typealias UnsignedInt = UInt64 // TODO: 2022/4/3
+typealias UnsignedInt = @Serializable(with = ULongVarIntSerializer::class) UInt64
 
 typealias Int8  = Byte
 typealias Int16 = Short

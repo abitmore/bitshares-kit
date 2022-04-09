@@ -12,12 +12,10 @@ data class Asset(
     val asset: AssetIdType
 ) {
     companion object {
-
         val INVALID = Asset(
             ShareType.MAX_VALUE,
             emptyIdType(),
         )
-
     }
 
 //    asset& operator += ( const asset& o )
@@ -167,15 +165,15 @@ data class PriceFeed(
     /** Forced settlements will evaluate using this price, defined as BITASSET / COLLATERAL */
     @SerialName("settlement_price")
     val settlementPrice: PriceType,
+    @SerialName("maintenance_collateral_ratio")
+    val maintenance_collateral_ratio: UInt16, // = GRAPHENE_DEFAULT_MAINTENANCE_COLLATERAL_RATIO.toUInt16(),
+    /** Fixed point between 1.000 and 10.000, implied fixed point denominator is GRAPHENE_COLLATERAL_RATIO_DENOM */
+    @SerialName("maximum_short_squeeze_ratio")
+    val maximum_short_squeeze_ratio: UInt16, // = GRAPHENE_DEFAULT_MAX_SHORT_SQUEEZE_RATIO.toUInt16(),
     /** Price at which automatically exchanging this asset for CORE from fee pool occurs (used for paying fees) */
     @SerialName("core_exchange_rate")
     val core_exchange_rate: PriceType,
     /** Fixed point between 1.000 and 10.000, implied fixed point denominator is GRAPHENE_COLLATERAL_RATIO_DENOM */
-    @SerialName("maintenance_collateral_ratio")
-    val maintenance_collateral_ratio: UInt16 = GRAPHENE_DEFAULT_MAINTENANCE_COLLATERAL_RATIO.toUInt16(),
-    /** Fixed point between 1.000 and 10.000, implied fixed point denominator is GRAPHENE_COLLATERAL_RATIO_DENOM */
-    @SerialName("maximum_short_squeeze_ratio")
-    val maximum_short_squeeze_ratio: UInt16 = GRAPHENE_DEFAULT_MAX_SHORT_SQUEEZE_RATIO.toUInt16(),
 ) {
 
 //    /**
@@ -316,14 +314,14 @@ data class PriceFeedWithIcr(
     @SerialName("core_exchange_rate")
     val coreExchangeRate: PriceType,
     @SerialName("maintenance_collateral_ratio")
-    val maintenanceCollateralRatio: UInt16 = GRAPHENE_DEFAULT_MAINTENANCE_COLLATERAL_RATIO,
+    val maintenanceCollateralRatio: UInt16, // = GRAPHENE_DEFAULT_MAINTENANCE_COLLATERAL_RATIO,
     @SerialName("maximum_short_squeeze_ratio")
-    val maximumShortSqueezeRatio: UInt16 = GRAPHENE_DEFAULT_MAX_SHORT_SQUEEZE_RATIO,
+    val maximumShortSqueezeRatio: UInt16, // = GRAPHENE_DEFAULT_MAX_SHORT_SQUEEZE_RATIO,
     // After BSIP77, when creating a new debt position or updating an existing position,
     // the position will be checked against this parameter.
     // Fixed point between 1.000 and 10.000, implied fixed point denominator is GRAPHENE_COLLATERAL_RATIO_DENOM
     @SerialName("initial_collateral_ratio")
-    val initialCollateralRatio: UInt16 = GRAPHENE_DEFAULT_MAINTENANCE_COLLATERAL_RATIO,
+    val initialCollateralRatio: UInt16, // = GRAPHENE_DEFAULT_MAINTENANCE_COLLATERAL_RATIO,
 )  {
 //
 //    price_feed_with_icr()
@@ -337,27 +335,6 @@ data class PriceFeedWithIcr(
 //    /// The result will be used to check new debt positions and position updates.
 //    /// Calculation: ~settlement_price * initial_collateral_ratio / GRAPHENE_COLLATERAL_RATIO_DENOM
 //    price get_initial_collateralization()const;
-}
-
-@Serializable
-data class AdditionalAssetOptions(
-    @SerialName("reward_percent")
-    val rewardPercent: UInt16 = 0U, // optional
-    @SerialName("whitelist_market_fee_sharing")
-    val whitelistMarketFeeSharing: FlatSet<AccountIdType> = sortedSetOf(), // optional
-    @SerialName("taker_fee_percent")
-    val takerFeePercent: UInt16 = 0U, // optional
-) : Extension<AdditionalAssetOptions> {
-
-    companion object {
-
-        val INVALID = AdditionalAssetOptions(
-            UInt16.MAX_VALUE,
-            sortedSetOf(),
-            UInt16.MAX_VALUE,
-        )
-
-    }
 }
 
 @Serializable
@@ -411,25 +388,18 @@ data class AssetOptions(
     @SerialName("description")
     val description: String,
     @SerialName("extensions")
-    val extensions: AdditionalAssetOptions
+    val extensions: Extensions
 ) : GrapheneComponent {
 
-    companion object {
-        val INVALID = AssetOptions(
-            ShareType.MAX_VALUE, // val maxSupply: ShareType,
-            UInt16.MAX_VALUE, // val marketFeePercent: UInt16,
-            ShareType.MAX_VALUE, // val maxMarketFee: ShareType,
-            UInt16.MAX_VALUE, // val issuerPermissions: UInt16,
-            UInt16.MAX_VALUE, // val flags: UInt16,
-            PriceType.INVALID, // val coreExchangeRate: PriceType, // = price(asset(), asset(0, asset_id_type(1)));
-            sortedSetOf(), // val whitelistAuthorities: FlatSet<K102_AccountType>,
-            sortedSetOf(), // val blacklistAuthorities: FlatSet<K102_AccountType>,
-            sortedSetOf(), // val whitelistMarkets: FlatSet<K103_AssetType>,
-            sortedSetOf(), // val blacklistMarkets: FlatSet<K103_AssetType>,
-            emptyString(), // val description: String,
-            AdditionalAssetOptions.INVALID, // val extensions: AdditionalAssetOptions
-        )
-    }
+    @Serializable
+    data class Extensions(
+        @SerialName("reward_percent")
+        val rewardPercent: Optional<UInt16> = optional(), // = 0U,
+        @SerialName("whitelist_market_fee_sharing")
+        val whitelistMarketFeeSharing: Optional<FlatSet<AccountIdType>> = optional(), // = sortedSetOf(),
+        @SerialName("taker_fee_percent")
+        val takerFeePercent: Optional<UInt16> = optional(), // = 0U,
+    ) : Extension<Extensions>
 
     // @return the bits in @ref flags which are allowed to be updated according to data in @ref issuer_permissions
 //    uint16_t get_enabled_issuer_permissions_mask() const;
@@ -447,20 +417,40 @@ data class AssetOptions(
 @Serializable
 data class BitassetOptions(
     @SerialName("feed_lifetime_sec")
-    val feedLifetimeSec: UInt32 = GRAPHENE_DEFAULT_PRICE_FEED_LIFETIME, // uint32_t
+    val feedLifetimeSec: UInt32,// = GRAPHENE_DEFAULT_PRICE_FEED_LIFETIME, // uint32_t
     @SerialName("minimum_feeds")
-    val minimumFeeds: UInt8 = 1U, // uint32_t
+    val minimumFeeds: UInt8,//= 1U, // uint32_t
     @SerialName("force_settlement_delay_sec")
-    val forceSettlementDelaySec: UInt32 = GRAPHENE_DEFAULT_FORCE_SETTLEMENT_DELAY,
+    val forceSettlementDelaySec: UInt32,// = GRAPHENE_DEFAULT_FORCE_SETTLEMENT_DELAY,
     @SerialName("force_settlement_offset_percent")
-    val forceSettlementOffsetPercent: UInt16 = GRAPHENE_DEFAULT_FORCE_SETTLEMENT_OFFSET,
+    val forceSettlementOffsetPercent: UInt16,// = GRAPHENE_DEFAULT_FORCE_SETTLEMENT_OFFSET,
     @SerialName("maximum_force_settlement_volume")
-    val maximumForceSettlementVolume: UInt16 = GRAPHENE_DEFAULT_FORCE_SETTLEMENT_MAX_VOLUME,
+    val maximumForceSettlementVolume: UInt16,// = GRAPHENE_DEFAULT_FORCE_SETTLEMENT_MAX_VOLUME,
     @SerialName("short_backing_asset")
     val shortBackingAsset: AssetId,
     @SerialName("extensions")
-    val extension: BitassetOptionsExtension,
-)
+    val extension: Extensions,
+) {
+    @Serializable
+    data class Extensions(
+        // After BSIP77, when creating a new debt position or updating an existing position,
+        // the position will be checked against this parameter.
+        // Unused for prediction markets, although we allow it to be set for simpler implementation
+        @SerialName("initial_collateral_ratio")
+        val initialCollateralRatio: Optional<UInt16> = optional(),  // BSIP-77
+        @SerialName("maintenance_collateral_ratio") // After BSIP75, the asset owner can update MCR directly
+        val maintenanceCollateralRatio: Optional<UInt16> = optional(),  // BSIP-75
+        @SerialName("maximum_short_squeeze_ratio") // After BSIP75, the asset owner can update MSSR directly
+        val maximumShortSqueezeRatio: Optional<UInt16> = optional(),  // BSIP-75
+        @SerialName("margin_call_fee_ratio")
+        val marginCallFeeRatio: Optional<UInt16> = optional(), // BSIP 74
+        @SerialName("force_settle_fee_percent")
+        val forceSettleFeePercent: Optional<UInt16> = optional(),  // BSIP-87
+        @SerialName("black_swan_response_method") // https://github.com/bitshares/bitshares-core/issues/2467
+        val blackSwanResponseMethod: Optional<UInt8> = optional(),
+    ) : Extension<Extensions>
+
+}
 
 @Serializable
 enum class BlackSwanResponseType {
@@ -470,22 +460,4 @@ enum class BlackSwanResponseType {
     @SerialName("individual_settlement_to_order") INDIVIDUAL_SETTLEMENT_TO_ORDER,
 }
 
-@Serializable
-data class BitassetOptionsExtension(
-    // After BSIP77, when creating a new debt position or updating an existing position,
-    // the position will be checked against this parameter.
-    // Unused for prediction markets, although we allow it to be set for simpler implementation
-    @SerialName("initial_collateral_ratio")
-    val initialCollateralRatio: Optional<UInt16> = optional(),  // BSIP-77
-    @SerialName("maintenance_collateral_ratio") // After BSIP75, the asset owner can update MCR directly
-    val maintenanceCollateralRatio: Optional<UInt16> = optional(),  // BSIP-75
-    @SerialName("maximum_short_squeeze_ratio") // After BSIP75, the asset owner can update MSSR directly
-    val maximumShortSqueezeRatio: Optional<UInt16> = optional(),  // BSIP-75
-    @SerialName("margin_call_fee_ratio")
-    val marginCallFeeRatio: Optional<UInt16> = optional(), // BSIP 74
-    @SerialName("force_settle_fee_percent")
-    val forceSettleFeePercent: Optional<UInt16> = optional(),  // BSIP-87
-    @SerialName("black_swan_response_method") // https://github.com/bitshares/bitshares-core/issues/2467
-    val blackSwanResponseMethod: Optional<UInt8> = optional(),
-) : Extension<BitassetOptionsExtension>
 

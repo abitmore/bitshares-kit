@@ -47,7 +47,7 @@ data class BlindInput(
 data class StealthConfirmation(
     @SerialName("one_time_key") val oneTimeKey: PublicKeyType,
     @SerialName("to") val to: Optional<PublicKeyType>,
-    @SerialName("encrypted_memo") val encryptedMemo: List<Char>,
+    @SerialName("encrypted_memo") val encryptedMemo: BinaryData,
 ) {
     @Serializable
     internal data class MemoData(

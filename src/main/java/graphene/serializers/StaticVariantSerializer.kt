@@ -86,6 +86,22 @@ object VarIntSerializer : KSerializer<Int32> {
         }
 }
 
+object ULongVarIntSerializer : KSerializer<ULong> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("ULongVarInt", PrimitiveKind.LONG)
+    private val elementSerializer = ULong.serializer()
+    override fun serialize(encoder: Encoder, value: ULong) =
+        when (encoder) {
+            is JsonEncoder -> elementSerializer.serialize(encoder, value)
+            is IOEncoder -> encoder.encodeVarInt(value.toLong())
+            else -> TODO()
+        }
+    override fun deserialize(decoder: Decoder): ULong =
+        when (decoder) {
+            is JsonDecoder -> elementSerializer.deserialize(decoder)
+            else -> TODO()
+        }
+}
+
 
 // new
 abstract class StaticVarSerializer<T: Any>(

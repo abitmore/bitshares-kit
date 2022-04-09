@@ -25,6 +25,9 @@ fun ByteArray.sha256(): ByteArray = sha256Digest.digest(this)
 fun ByteArray.sha512(): ByteArray = sha512Digest.digest(this)
 
 fun ByteArray.ripemd160(): ByteArray = Utils.ripemd160(this)
+fun ByteArray.hash160(): ByteArray = Utils.ripemd160(sha256Digest.digest(this))
+
+
 
 
 fun String.sha256(iteration: Int): ByteArray {
