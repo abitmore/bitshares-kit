@@ -1,6 +1,6 @@
 plugins {
     kotlin("jvm")
-    kotlin("plugin.serialization") version "1.6.10"
+    kotlin("plugin.serialization") version "1.6.20"
 }
 
 group = "bitshares-kit"
@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    val kotlinVersion = "1.6.10"
+    val kotlinVersion = "1.6.20"
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-io-jvm:0.1.16")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
