@@ -1,4 +1,11 @@
 # BitShares Kit
+A Kotlin/JVM based library for [BitShares](https://bitshares.org) blockchain. It implements most functions of [BitShares Core](https://github.com/bitshares/bitshares-core) including objects (de)serialization, transactions sign/broadcast, wallet create/restore, and more.
+
+## Features
+TODO
+
+## Usage
+TODO
 
 ## License
 
