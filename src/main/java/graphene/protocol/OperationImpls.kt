@@ -53,16 +53,6 @@ data class CallOrderUpdateOperation(
     @SerialName("extensions") val extensions: Extensions,
 ) : Operation() {
     //    typealias extensions_type = extension<options_type>, // note: this will be jsonified to {...} but no longer [...]
-
-    @JvmOverloads
-    constructor(
-        fee: Asset,
-        account: AccountIdType,
-        deltaCollateral: Asset,
-        deltaDebt: Asset,
-        targetCollateralRatio: Optional<UInt16> = optional(),
-    ) : this(fee, account, deltaCollateral, deltaDebt, Extensions(targetCollateralRatio))
-
     @Serializable
     data class Extensions(
         @SerialName("target_collateral_ratio") val targetCollateralRatio: Optional<UInt16> = optional() // maximum CR to maintain when selling collateral on margin call
@@ -94,21 +84,6 @@ data class AccountCreateOperation(
     @SerialName("options") val options: AccountOptions,
     @SerialName("extensions") val extensions: Extensions,
 ) : Operation() {
-
-    constructor(
-        fee: Asset,
-        registrar: AccountIdType,
-        referrer: AccountIdType,
-        referrerPercent: UInt16,
-        name: String,
-        owner: Authority,
-        active: Authority,
-        options: AccountOptions,
-        nullExt: Optional<Unit> = optional(),
-        ownerSpecialAuthority: Optional<SpecialAuthority> = optional(),
-        activeSpecialAuthority: Optional<SpecialAuthority> = optional(),
-        buybackOptions: Optional<BuybackAccountOptions> = optional(),
-    ) : this(fee, registrar, referrer, referrerPercent, name, owner, active, options, Extensions(nullExt, ownerSpecialAuthority, activeSpecialAuthority, buybackOptions))
 
     @Serializable
     data class Extensions(
