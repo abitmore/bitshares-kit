@@ -17,7 +17,7 @@ data class AccountOptions(
     @SerialName("votes")
     val vote: FlatSet<VoteIdType>,
     @SerialName("extensions")
-    val extensions: FutureExtensions,
+    val extensions: FutureExtensions = emptyExtension(),
 ) : GrapheneComponent {
 
     companion object {

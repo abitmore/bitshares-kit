@@ -47,7 +47,11 @@ class GrapheneClient(val node: Node, var debug: Boolean = true) : AbstractClient
 
     private val client = HttpClient(CIO.create()) {
         install(WebSockets) {
-            contentConverter = KotlinxWebsocketSerializationConverter(GRAPHENE_JSON_PLATFORM_SERIALIZER)
+            // TODO: 2022/4/11  
+            contentConverter = KotlinxWebsocketSerializationConverter(Json {
+                ignoreUnknownKeys = false
+                encodeDefaults = true
+            })
             pingInterval = 10000
         }
         install(ContentNegotiation)

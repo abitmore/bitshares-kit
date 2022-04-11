@@ -10,30 +10,20 @@ data class VoteIdType(
     val instance: UInt32 = 0U,
 ) : GrapheneComponent, Comparable<VoteIdType> {
 
-    companion object {
-
-        fun fromStringId(id: String): VoteIdType {
-            return VoteIdType(
-                id.substringBefore(':').toInt().let { VoteType.values()[it] },
-                id.substringAfter(':').toUInt()
-            )
-        }
-    }
-
     enum class VoteType {
         COMMITTEE,
         WITNESS,
         WORKER,
     }
 
-    private val content: UInt32 = instance shl 8 or type.ordinal.toUInt()
-
+    val content: UInt32 = instance shl 8 or type.ordinal.toUInt()
     override fun toString(): String {
         return "${type.ordinal}:${instance}"
     }
-
     override fun compareTo(other: VoteIdType): Int {
-        return (content - other.content).toInt()
+        return content.compareTo(other.content)
     }
+    override fun hashCode(): Int = content.hashCode()
+    override fun equals(other: Any?): Boolean = other is VoteIdType && content == other.content
 
 }

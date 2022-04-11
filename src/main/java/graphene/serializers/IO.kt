@@ -50,6 +50,7 @@ class IOEncoder(
 
     private var index = 0
     private var presenceCount = 0
+
     fun encodePresence(value: Boolean) {
         if (encodeIndex) {
             if (value) {
@@ -66,6 +67,9 @@ class IOEncoder(
     fun encodeByteArray(value: ByteArray): Unit = currentOutput.writeFully(value)
     fun encodeVarInt(value: Int) = currentOutput.writeVarInt(value)
     fun encodeVarInt(value: Long) = currentOutput.writeVarInt(value)
+
+    override fun encodeNotNullMark() = encodePresence(true)
+    override fun encodeNull() = encodePresence(false)
 
     override fun encodeBoolean(value: Boolean) = currentOutput.writeByte(if (value) 0x01 else 0x00)
     override fun encodeByte(value: Byte) = currentOutput.writeByte(value)

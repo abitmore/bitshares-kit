@@ -20,4 +20,6 @@ fun <T> Optional<T>.getOrNull() = valueSafe
 fun <T> Optional<T>.getOrThrow() = value
 fun <T> Optional<T>.getOrElse(fallback: () -> T) = valueSafe ?: fallback()
 
-fun <T> optional(value: T? = null) = Optional(value)
+fun <T> optional(value: T? = null) = Optional<T>(value)
+
+fun <T> T.toOptional() = Optional<T>(this)

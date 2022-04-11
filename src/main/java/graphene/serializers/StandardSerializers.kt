@@ -6,6 +6,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -16,14 +17,13 @@ import kotlinx.serialization.json.JsonEncoder
 object VoteIdTypeSerializer : KSerializer<VoteIdType> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("VoteIdType", PrimitiveKind.STRING)
     override fun deserialize(decoder: Decoder): VoteIdType =
-        decoder.decodeString().run { VoteIdType.fromStringId(this) }
-    override fun serialize(encoder: Encoder, value: VoteIdType) {
+        decoder.decodeString().toVote()
+    override fun serialize(encoder: Encoder, value: VoteIdType) =
         when (encoder) {
             is JsonEncoder -> encoder.encodeString(value.toString())
+            is IOEncoder -> UInt32.serializer().serialize(encoder, value.content)
             else -> TODO()
         }
-    }
-
 }
 
 object TimePointSecSerializer: KSerializer<Instant> {
@@ -49,7 +49,7 @@ class OptionalSerializer<T>(
     override val descriptor: SerialDescriptor = elementSerializer.descriptor
     override fun deserialize(decoder: Decoder): Optional<T> {
         return try {
-            optional(elementSerializer.deserialize(decoder))
+            elementSerializer.deserialize(decoder).toOptional()
         } catch (e: Throwable) {
             e.printStackTrace()
             optional(null)

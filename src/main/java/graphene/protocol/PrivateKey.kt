@@ -28,35 +28,27 @@ data class PrivateKeyType(
     val isValid: Boolean = keyBytes.copyOfRange(0, keyBytes.size - 4).sha256().sha256().copyOfRange(0, 4).contentEquals(checksumBytes)
 
     companion object {
-
         val EMPTY = PrivateKeyType()
-
-        fun fromECKey(ecKey: ECKey, prefix: String, type: KeyType): PrivateKeyType {
+        fun fromECKey(ecKey: ECKey, prefix: String): PrivateKeyType {
             val bytes = byteArrayOf(0x80.toByte()) + ecKey.privKeyBytes!!
             val address = (bytes + bytes.sha256().sha256().copyOfRange(0, 4)).encodeBase58()
             return PrivateKeyType(address, prefix, KeyType.UNDEFINED)
         }
-
         fun fromSeed(string: String, prefix: String): PrivateKeyType {
-            return fromECKey(ECKey.fromPrivate(string.sha256()), prefix, KeyType.SEED)
+            return fromECKey(ECKey.fromPrivate(string.sha256()), prefix)
         }
-
         fun fromWif(wif: String, prefix: String): PrivateKeyType {
             return PrivateKeyType(wif, prefix, KeyType.WIF)
         }
-
         fun fromMnemonic(words: List<String>, sequence: Int = 0, prefix: String): PrivateKeyType {
             return if (words.size in 10..16) {
                 val seed = (words + sequence).joinToString(" ")
-                fromECKey(ECKey.fromPrivate(seed.sha512().sha256()), prefix, KeyType.MNEMONIC)
+                fromECKey(ECKey.fromPrivate(seed.sha512().sha256()), prefix)
             } else {
                 throw IllegalArgumentException("Invalid dictionary size!")
-//                KPrivateKey(prefix = prefix, type = KeyType.MNEMONIC)
             }
         }
-
         fun random(prefix: String): PrivateKeyType = fromSeed(nextSecureRandomBytes(64).toHexString(), prefix)
-
         fun randomPassword(prefix: String): String = "P${random(prefix).address}"
 
     }

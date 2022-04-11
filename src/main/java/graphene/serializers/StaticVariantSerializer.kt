@@ -11,6 +11,7 @@ import kotlinx.serialization.encoding.encodeStructure
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonEncoder
 import kotlin.reflect.KClass
+import kotlin.reflect.full.createType
 
 fun staticVarSerialDescriptor(
     elementDescriptor: SerialDescriptor
@@ -105,19 +106,24 @@ object ULongVarIntSerializer : KSerializer<ULong> {
 
 // new
 abstract class StaticVarSerializer<T: Any>(
-    val typelist: List<KClass<out T>>,
+    val classList: List<KClass<out T>>,
     val fallback: Map<KClass<out T>, KSerializer<out T>> = emptyMap(),
 ) : KSerializer<T> {
 
-    private val typelistInternal = typelist.map {
+    private val classListInternal = classList.map {
         @OptIn(InternalSerializationApi::class)
         fallback.getOrElse(it) { it.serializer() }
     }
-    override val descriptor: SerialDescriptor = staticVarSerialDescriptor(typelistInternal.first().descriptor) // TODO: 2022/4/6
+    override val descriptor: SerialDescriptor = staticVarSerialDescriptor(classListInternal.first().descriptor) // TODO: 2022/4/6
+
+    val typeList = classList.map { it.createType() }
+    val comparator = Comparator { o1: T, o2: T ->
+        classList.indexOf(o1::class) - classList.indexOf(o2::class)
+    }
 
     private val tagSerializer = VarLongSerializer
     fun getSerializer(tag: Int64): KSerializer<T> {
-        val clazz: KClass<out T> = typelist[tag.toInt32()]
+        val clazz: KClass<out T> = classList[tag.toInt32()]
         @OptIn(InternalSerializationApi::class)
         return (clazz.serializerOrNull() ?: fallback[clazz]!!) as KSerializer<T> // TODO: 2022/4/6
     }
@@ -130,7 +136,7 @@ abstract class StaticVarSerializer<T: Any>(
     }
     override fun serialize(encoder: Encoder, value: T) {
         encoder.encodeStructure(descriptor) {
-            val tag: Int64 = typelist.indexOf(value::class).toInt64()
+            val tag: Int64 = classList.indexOf(value::class).toInt64()
             encodeSerializableElement(tagSerializer.descriptor, 0, tagSerializer, tag)
             val valueSerializer = getSerializer(tag)
             encodeSerializableElement(valueSerializer.descriptor, 1, valueSerializer, value)

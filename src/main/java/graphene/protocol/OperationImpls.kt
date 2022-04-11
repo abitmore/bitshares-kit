@@ -18,7 +18,7 @@ data class TransferOperation(
     @SerialName("to") val to: AccountIdType, // Account to transfer asset to
     @SerialName("amount") val amount: Asset, // The amount of asset to transfer from @ref from to @ref to
     @SerialName("memo") val memo: Optional<MemoData> = optional(), // User provided data encrypted to the memo key of the "to" account
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 
 /*  1 */ 
@@ -31,7 +31,7 @@ data class LimitOrderCreateOperation(
     @Serializable(with = TimePointSecSerializer::class)
     @SerialName("expiration") val expiration: Instant, // = MAXIMUM // The order will be removed from the books if not filled by expiration // Upon expiration, all unsold asset will be returned to seller
     @SerialName("fill_or_kill") val fillOrKill: Boolean = false,  // If this flag is set the entire order must be filled or the operation is rejected
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 
 /*  2 */ 
@@ -40,7 +40,7 @@ data class LimitOrderCancelOperation(
     @SerialName("fee") val fee: Asset,
     @SerialName("fee_paying_account") val account: AccountIdType, // must be order->seller
     @SerialName("order") val order: LimitOrderIdType,
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 
 /*  3 */
@@ -53,6 +53,16 @@ data class CallOrderUpdateOperation(
     @SerialName("extensions") val extensions: Extensions,
 ) : Operation() {
     //    typealias extensions_type = extension<options_type>, // note: this will be jsonified to {...} but no longer [...]
+
+    @JvmOverloads
+    constructor(
+        fee: Asset,
+        account: AccountIdType,
+        deltaCollateral: Asset,
+        deltaDebt: Asset,
+        targetCollateralRatio: Optional<UInt16> = optional(),
+    ) : this(fee, account, deltaCollateral, deltaDebt, Extensions(targetCollateralRatio))
+
     @Serializable
     data class Extensions(
         @SerialName("target_collateral_ratio") val targetCollateralRatio: Optional<UInt16> = optional() // maximum CR to maintain when selling collateral on margin call
@@ -84,6 +94,22 @@ data class AccountCreateOperation(
     @SerialName("options") val options: AccountOptions,
     @SerialName("extensions") val extensions: Extensions,
 ) : Operation() {
+
+    constructor(
+        fee: Asset,
+        registrar: AccountIdType,
+        referrer: AccountIdType,
+        referrerPercent: UInt16,
+        name: String,
+        owner: Authority,
+        active: Authority,
+        options: AccountOptions,
+        nullExt: Optional<Unit> = optional(),
+        ownerSpecialAuthority: Optional<SpecialAuthority> = optional(),
+        activeSpecialAuthority: Optional<SpecialAuthority> = optional(),
+        buybackOptions: Optional<BuybackAccountOptions> = optional(),
+    ) : this(fee, registrar, referrer, referrerPercent, name, owner, active, options, Extensions(nullExt, ownerSpecialAuthority, activeSpecialAuthority, buybackOptions))
+
     @Serializable
     data class Extensions(
         @SerialName("null_ext") val nullExt: Optional<Unit> = optional(),
@@ -118,7 +144,7 @@ data class AccountWhitelistOperation(
     @SerialName("authorizing_account") val account: AccountIdType, // The account which is specifying an opinion of another account
     @SerialName("account_to_list") val target: AccountIdType, // The account being opined about
     @SerialName("new_listing") val type: UInt8, // = AccountListing.NO_LISTING // The new white and blacklist status of account_to_list, as determined by authorizing_account // This is a bitfield using values defined in the account_listing enum
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation() {
     @Serializable(with = AccountListingSerializer::class)
     enum class AccountListing(val value: UInt8) {
@@ -142,7 +168,7 @@ data class AccountUpgradeOperation(
     @SerialName("fee") val fee: Asset,
     @SerialName("account_to_upgrade") val account: AccountIdType, // The account to upgrade; must not already be a lifetime member
     @SerialName("upgrade_to_lifetime_member") val isLifetime: Boolean, // If true, the account will be upgraded to a lifetime member; otherwise, it will add a year to the subscription
-    @SerialName("extensions") val extensions: FutureExtensions, // = false
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(), // = false
 ) : Operation()
 
 /*  9 */ 
@@ -151,7 +177,7 @@ data class AccountTransferOperation(
     @SerialName("fee") val fee: Asset,
     @SerialName("account_id") val account: AccountIdType,
     @SerialName("new_owner") val newOwner: AccountIdType,
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 
 /* 10 */ 
@@ -168,7 +194,7 @@ data class AssetCreateOperation(
     @SerialName("common_options") val assetOptions: AssetOptions,
     @SerialName("bitasset_opts") val bitassetOptions: Optional<BitassetOptions> = optional(), // Options only available for BitAssets. MUST be non-null if and only if the asset is market-issued.
     @SerialName("is_prediction_market") val isPredictionMarket: Boolean, // = false, // For BitAssets, set this to true if the asset implements a prediction market; false otherwise
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 
 /* 11 */
@@ -199,7 +225,7 @@ data class AssetUpdateBitassetOperation(
     @SerialName("issuer") val account: AccountIdType,
     @SerialName("asset_to_update") val asset: AssetIdType,
     @SerialName("new_options") val newOptions: BitassetOptions,
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 
 /* 13 */ 
@@ -209,7 +235,7 @@ data class AssetUpdateFeedProducersOperation(
     @SerialName("issuer") val account: AccountIdType,
     @SerialName("asset_to_update") val asset: AssetIdType,
     @SerialName("new_feed_producers") val newFeedProducers: FlatSet<AccountIdType>,
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 
 /* 14 */ 
@@ -220,7 +246,7 @@ data class AssetIssueOperation(
     @SerialName("asset_to_issue") val asset: Asset,
     @SerialName("issue_to_account") val issueTo: AccountIdType,
     @SerialName("memo") val memo: Optional<MemoData> = optional(), // user provided data encrypted to the memo key of the "to" account
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 
 /* 15 */ 
@@ -229,7 +255,7 @@ data class AssetReserveOperation(
     @SerialName("fee") val fee: Asset,
     @SerialName("payer") val account: AccountIdType,
     @SerialName("amount_to_reserve") val amount: Asset,
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 
 /* 16 */ 
@@ -239,7 +265,7 @@ data class AssetFundFeePoolOperation(
     @SerialName("from_account") val account: AccountIdType,
     @SerialName("asset_id") val asset: AssetIdType,
     @SerialName("amount") val amount: ShareType, // core asset
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 
 /* 17 */ 
@@ -248,7 +274,7 @@ data class AssetSettleOperation(
     @SerialName("fee") val fee: Asset,
     @SerialName("account") val account: AccountIdType, // Account requesting the force settlement. This account pays the fee
     @SerialName("amount") val amount: Asset, // Amount of asset to force settle. This must be a market-issued asset
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 
 /* 18 */ 
@@ -258,7 +284,7 @@ data class AssetGlobalSettleOperation(
     @SerialName("issuer") val account: AccountIdType, // must equal issuer of @ref asset_to_settle
     @SerialName("asset_to_settle") val asset: AssetIdType,
     @SerialName("settle_price") val settlePrice: PriceType,
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 
 /* 19 */ 
@@ -306,7 +332,7 @@ data class ProposalCreateOperation(
     @SerialName("expiration_time") val expiration: Instant,
     @SerialName("proposed_ops") val proposedOperations: List<OperationWrapper>,
     @SerialName("review_period_seconds") val reviewPeriodSeconds: Optional<UInt32> = optional(),
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 
 /* 23 */ 
@@ -321,7 +347,7 @@ data class ProposalUpdateOperation(
     @SerialName("owner_approvals_to_remove") val ownerApprovalsToRemove: FlatSet<AccountIdType>,
     @SerialName("key_approvals_to_add") val keyApprovalsToAdd: FlatSet<PublicKeyType>,
     @SerialName("key_approvals_to_remove") val keyApprovalsToRemove: FlatSet<PublicKeyType>,
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 
 /* 24 */ 
@@ -331,7 +357,7 @@ data class ProposalDeleteOperation(
     @SerialName("fee_paying_account") val account: AccountIdType,
     @SerialName("using_owner_authority") val usingOwnerAuthority: Boolean, // = false,
     @SerialName("proposal") val proposal: ProposalIdType,
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 
 /* 25 */ 
@@ -462,7 +488,7 @@ data class AssertOperation(
     @SerialName("fee_paying_account") val account: AccountIdType,
     @SerialName("predicates") val predicates: List<Predicate>,
     @SerialName("required_auths") val requiredAuths: FlatSet<AccountIdType>,
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 
 /* 37 */ 
@@ -484,7 +510,7 @@ data class OverrideTransferOperation(
     @SerialName("to") val to: AccountIdType, // Account to transfer asset to
     @SerialName("amount") val amount: Asset, // The amount of asset to transfer from @ref from to @ref to
     @SerialName("memo") val memo: Optional<MemoData> = optional(), // User provided data encrypted to the memo key of the "to" account
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 
 /* 39 */ 
@@ -496,7 +522,8 @@ data class TransferToBlindOperation(
     @SerialName("blinding_factor") val blindingFactor: BlindFactorType,
     @SerialName("outputs") val outputs: List<BlindOutput>,
 ) : Operation()
-
+//354518f46abaaec4ef620127fc10637695e80000f29ad08e94f406221ed5d10f2a0000c5a6f9c9c38b0a9deaefe19afc293ade9213df03d7620b744b53227659829b35c57a0ded106ec8efc29b964cea4b01                                         0c363133383435393334306434 64dc90a248cd7380c956b5b02babaf4b0de3768bbded137c0e6307751705de30acc7cddf2c848456b1bf6e391d49893d2c8fec9791a515a4ff12eccfa18ce7a909313f25c9f4202f64e47d60414b1cba1b952c838c20bd6a8c2a374253e8117f90c1897003b07b9dd1018892878dfbec089f360103759519857ef67b31b0f08e76a9ab51c8849b3ab12ec747728316c52cb81500521cdd0001035386d212fdbf8f6e9c569fa7fac96d9301de285edc8cf8633dc14775593abd230103da20db3695d9e899560b6bf1e7b6dd9b61640fe0350a6513287b975c6c2f318364f71ac69730700589cb8e27e2b3cd4945372e7fdea4754c3aba46569523cd866e616c04bfdb32bcef9e859732675c5a6085c11f551082f28ed12ce414caad01afa0fa9de553f27b636791245212683b773add89df28d6a173eaa24a331b7196ef5a78f5ad0000
+//354518f46abaaec4ef620127fc10637695e80000f29ad08e94f406221ed5d10f2a0000c5a6f9c9c38b0a9deaefe19afc293ade9213df03d7620b744b53227659829b35c57a0ded106ec8efc29b964cea4b01 6138459340d4000000000000000000000000000000000000000000000000000000 64dc90a248cd7380c956b5b02babaf4b0de3768bbded137c0e6307751705de30acc7cddf2c848456b1bf6e391d49893d2c8fec9791a515a4ff12eccfa18ce7a909313f25c9f4202f64e47d60414b1cba1b952c838c20bd6a8c2a374253e8117f90c1897003b07b9dd1018892878dfbec089f360103759519857ef67b31b0f08e76a9ab51c8849b3ab12ec747728316c52cb81500521cdd0001035386d212fdbf8f6e9c569fa7fac96d9301de285edc8cf8633dc14775593abd230103da20db3695d9e899560b6bf1e7b6dd9b61640fe0350a6513287b975c6c2f318364f71ac69730700589cb8e27e2b3cd4945372e7fdea4754c3aba46569523cd866e616c04bfdb32bcef9e859732675c5a6085c11f551082f28ed12ce414caad01afa0fa9de553f27b636791245212683b773add89df28d6a173eaa24a331b7196ef5a78f5ad0000
 /* 40 */ 
 @Serializable
 data class BlindTransferOperation(
@@ -559,7 +586,7 @@ data class BidCollateralOperation(
     @SerialName("bidder") val account: AccountIdType, // pays fee and additional collateral
     @SerialName("additional_collateral") val additionalCollateral: Asset, // the amount of collateral to bid for the debt
     @SerialName("debt_covered") val debtCovered: Asset, // the amount of debt to take over
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 
 /* 46 */ 
@@ -578,7 +605,7 @@ data class AssetClaimPoolOperation(
     @SerialName("issuer") val account: AccountIdType,
     @SerialName("asset_id") val asset: AssetIdType, // fee.asset_id must != asset_id
     @SerialName("amount_to_claim") val amount: Asset, // core asset
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 
 /* 48 */ 
@@ -588,7 +615,7 @@ data class AssetUpdateIssuerOperation(
     @SerialName("issuer") val account: AccountIdType,
     @SerialName("asset_to_update") val asset: AssetIdType,
     @SerialName("new_issuer") val newIssuer: AccountIdType,
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 
 /* 49 */ 
@@ -616,7 +643,7 @@ data class HtlcRedeemOperation(
     @SerialName("htlc_id") val htlc: HtlcIdType, // the object we are attempting to update
     @SerialName("redeemer") val redeemer: AccountIdType, // who is attempting to update the transaction
     @SerialName("preimage") val preimage: BinaryData, // the preimage (not used if after epoch timeout)
-    @SerialName("extensions") val extensions: FutureExtensions, // for future expansion
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(), // for future expansion
 ) : Operation()
 
 /* 51 */ 
@@ -640,7 +667,7 @@ data class HtlcExtendOperation(
     @SerialName("htlc_id") val htlcId: HtlcIdType, // the object we are attempting to update
     @SerialName("update_issuer") val updateIssuer: AccountIdType, // who is attempting to update the transaction
     @SerialName("seconds_to_add") val secondsToAdd: UInt32, // how much to add
-    @SerialName("extensions") val extensions: FutureExtensions, // for future expansion
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(), // for future expansion
 ) : Operation()
 
 // TODO: 2022/4/5
@@ -669,7 +696,7 @@ data class CustomAuthorityCreateOperation(
     @SerialName("operation_type") val operationType: UnsignedInt, // Tag of the operation this custom authority can authorize
     @SerialName("auth") val auth: Authority, // Authentication requirements for the custom authority
     @SerialName("restrictions") val restrictions: List<Restriction>, // Restrictions on operations this custom authority can authenticate
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 
 /* 55 */ 
@@ -684,7 +711,7 @@ data class CustomAuthorityUpdateOperation(
     @SerialName("new_auth") val newAuth: Optional<Authority> = optional(), // Change to the authentication for the custom authority
     @SerialName("restrictions_to_remove") val restrictionsToRemove: FlatSet<UInt16>, // Set of IDs of restrictions to remove
     @SerialName("restrictions_to_add") val restrictionsToAdd: List<Restriction>, // Vector of new restrictions
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 /* 56 */ 
 @Serializable
@@ -692,7 +719,7 @@ data class CustomAuthorityDeleteOperation(
     @SerialName("fee") val fee: Asset,
     @SerialName("account") val account: AccountIdType, // Account which owns the custom authority to update; also pays the fee
     @SerialName("authority_to_delete") val authorityToDelete: CustomAuthorityIdType, // ID of the custom authority to delete
-    @SerialName("extensions") val extensions: FutureExtensions,
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),
 ) : Operation()
 
 /* 57 */ 
@@ -702,7 +729,7 @@ data class TicketCreateOperation(
     @SerialName("account") val account: AccountIdType, // The account who creates the ticket
     @SerialName("target_type") val targetType: UnsignedInt, // The target ticket type, see @ref ticket_type
     @SerialName("amount") val amount: Asset, // The amount of the ticket
-    @SerialName("extensions") val extensions: FutureExtensions, // Unused. Reserved for future use.
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(), // Unused. Reserved for future use.
 ) : Operation()
 
 /* 58 */ 
@@ -713,7 +740,7 @@ data class TicketUpdateOperation(
     @SerialName("account") val account: AccountIdType, // The account who owns the ticket
     @SerialName("target_type") val targetType: UnsignedInt, // New target ticket type, see @ref ticket_type
     @SerialName("amount_for_new_target") val amountForNewTarget: Optional<Asset> = optional(), // The amount to be used for the new target
-    @SerialName("extensions") val extensions: FutureExtensions, // Unused. Reserved for future use.
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(), // Unused. Reserved for future use.
 ) : Operation()
 
 /* 59 */ 
@@ -726,7 +753,7 @@ data class LiquidityPoolCreateOperation(
     @SerialName("share_asset") val shareAsset: AssetIdType, // Type of the share asset aka the LP token
     @SerialName("taker_fee_percent") val takerFeePercent: UInt16, // = 0 // Taker fee percent
     @SerialName("withdrawal_fee_percent") val withdrawalFeePercent: UInt16, // = 0 // Withdrawal fee percent
-    @SerialName("extensions") val extensions: FutureExtensions, // Unused. Reserved for future use.
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(), // Unused. Reserved for future use.
 ) : Operation()
 
 /* 60 */ 
@@ -735,7 +762,7 @@ data class LiquidityPoolDeleteOperation(
     @SerialName("fee") val fee: Asset, // Operation fee
     @SerialName("account") val account: AccountIdType, // The account who owns the liquidity pool
     @SerialName("pool") val pool: LiquidityPoolIdType, // ID of the liquidity pool
-    @SerialName("extensions") val extensions: FutureExtensions, // Unused. Reserved for future use.
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(), // Unused. Reserved for future use.
 ) : Operation()
 
 
@@ -747,7 +774,7 @@ data class LiquidityPoolDepositOperation(
     @SerialName("pool") val pool: LiquidityPoolIdType, // ID of the liquidity pool
     @SerialName("amount_a") val amountA: Asset, // The amount of the first asset to deposit
     @SerialName("amount_b") val amountB: Asset, // The amount of the second asset to deposit
-    @SerialName("extensions") val extensions: FutureExtensions, // Unused. Reserved for future use.
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(), // Unused. Reserved for future use.
 
 ) : Operation()
 /* 62 */ 
@@ -757,7 +784,7 @@ data class LiquidityPoolWithdrawOperation(
     @SerialName("account") val account: AccountIdType, // The account who withdraws from the liquidity pool
     @SerialName("pool") val pool: LiquidityPoolIdType, // ID of the liquidity pool
     @SerialName("share_amount") val shareAmount: Asset, // The amount of the share asset to use
-    @SerialName("extensions") val extensions: FutureExtensions, // Unused. Reserved for future use.
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(), // Unused. Reserved for future use.
 ) : Operation()
 
 /* 63 */ 
@@ -768,7 +795,7 @@ data class LiquidityPoolExchangeOperation(
     @SerialName("pool") val pool: LiquidityPoolIdType, // ID of the liquidity pool
     @SerialName("amount_to_sell") val amountToSell: Asset, // The amount of one asset type to sell
     @SerialName("min_to_receive") val minToReceive: Asset, // The minimum amount of the other asset type to receive
-    @SerialName("extensions") val extensions: FutureExtensions, // Unused. Reserved for future use.
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(), // Unused. Reserved for future use.
 ) : Operation()
 
 /* 64 */ 
@@ -779,7 +806,7 @@ data class SametFundCreateOperation(
     @SerialName("asset_type") val asset: AssetIdType, // Asset type in the fund
     @SerialName("balance") val balance: ShareType,// Usable amount in the fund
     @SerialName("fee_rate") val feeRate: UInt32, // = 0 // Fee rate, the demominator is GRAPHENE_FEE_RATE_DENOM
-    @SerialName("extensions") val extensions: FutureExtensions, // Unused. Reserved for future use.
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(), // Unused. Reserved for future use.
 ) : Operation()
 
 /* 65 */ 
@@ -788,7 +815,7 @@ data class SametFundDeleteOperation(
     @SerialName("fee") val fee: Asset, // Operation fee
     @SerialName("owner_account") val account: AccountIdType, // The account who owns the SameT Fund object
     @SerialName("fund_id") val fund: SametFundIdType, // ID of the SameT Fund object
-    @SerialName("extensions") val extensions: FutureExtensions, // Unused. Reserved for future use.
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(), // Unused. Reserved for future use.
 ) : Operation()
 
 /* 66 */ 
@@ -799,7 +826,7 @@ data class SametFundUpdateOperation(
     @SerialName("fund_id") val fund: SametFundIdType, // ID of the SameT Fund object
     @SerialName("delta_amount") val deltaAmount: Optional<Asset> = optional(), // Delta amount, optional
     @SerialName("new_fee_rate") val newFeeRate: Optional<UInt32> = optional(), // New fee rate, optional
-    @SerialName("extensions") val extensions: FutureExtensions, // Unused. Reserved for future use.
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(), // Unused. Reserved for future use.
 ) : Operation()
 
 /* 67 */ 
@@ -809,7 +836,7 @@ data class SametFundBorrowOperation(
     @SerialName("borrower") val account: AccountIdType, // The account who borrows from the fund
     @SerialName("fund_id") val fund: SametFundIdType, // ID of the SameT Fund
     @SerialName("borrow_amount") val amount: Asset, // The amount to borrow
-    @SerialName("extensions") val extensions: FutureExtensions, // Unused. Reserved for future use.
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(), // Unused. Reserved for future use.
 ) : Operation()
 
 /* 68 */ 
@@ -820,7 +847,7 @@ data class SametFundRepayOperation(
     @SerialName("fund_id") val fund: SametFundIdType, // ID of the SameT Fund
     @SerialName("repay_amount") val amount: Asset, // The amount to repay
     @SerialName("fund_fee") val fundFee: Asset, // Fee for using the fund
-    @SerialName("extensions") val extensions: FutureExtensions, // Unused. Reserved for future use.
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(), // Unused. Reserved for future use.
 
 ) : Operation()
 
@@ -840,7 +867,7 @@ data class CreditOfferCreateOperation(
     @SerialName("auto_disable_time") val autoDisableTime: Instant, // The time when this offer will be disabled automatically
     @SerialName("acceptable_collateral") val acceptableCollateral: FlatMap<AssetIdType, PriceType>, // Types and rates of acceptable collateral
     @SerialName("acceptable_borrowers") val acceptableBorrowers: FlatMap<AccountIdType, ShareType>, // Allowed borrowers and their maximum amounts to borrow. No limitation if empty.
-    @SerialName("extensions") val extensions: FutureExtensions, // Unused. Reserved for future use.
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(), // Unused. Reserved for future use.
 ) : Operation()
 
 /* 70 */ 
@@ -849,7 +876,7 @@ data class CreditOfferDeleteOperation(
     @SerialName("fee") val fee: Asset, // Operation fee
     @SerialName("owner_account") val account: AccountIdType, // The account who owns the credit offer
     @SerialName("offer_id") val offer: CreditOfferIdType, // ID of the credit offer
-    @SerialName("extensions") val extensions: FutureExtensions,// Unused. Reserved for future use.
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(),// Unused. Reserved for future use.
 ) : Operation()
 
 /* 71 */ 
@@ -866,7 +893,7 @@ data class CreditOfferUpdateOperation(
     @SerialName("auto_disable_time") val autoDisableTime: Optional<@Serializable(with = TimePointSecSerializer::class) Instant>, // New time to disable automatically, optional
     @SerialName("acceptable_collateral") val acceptableCollateral: Optional<FlatMap<AssetIdType, PriceType>> = optional(), // New types and rates of acceptable collateral, optional
     @SerialName("acceptable_borrowers") val acceptableBorrowers: Optional<FlatMap<AccountIdType, ShareType>> = optional(), // New allowed borrowers and their maximum amounts to borrow, optional
-    @SerialName("extensions") val extensions: FutureExtensions, // Unused. Reserved for future use.
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(), // Unused. Reserved for future use.
 ) : Operation()
 
 /* 72 */ 
@@ -879,7 +906,7 @@ data class CreditOfferAcceptOperation(
     @SerialName("collateral") val collateral: Asset, // The collateral
     @SerialName("max_fee_rate") val maxFeeRate: UInt32, // = 0 // The maximum acceptable fee rate
     @SerialName("min_duration_seconds") val minDurationSeconds: UInt32, // = 0 // The minimum acceptable duration
-    @SerialName("extensions") val extensions: FutureExtensions, // Unused. Reserved for future use.
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(), // Unused. Reserved for future use.
 ) : Operation()
 
 /* 73 */ 
@@ -890,7 +917,7 @@ data class CreditDealRepayOperation(
     @SerialName("deal_id") val deal: CreditDealIdType, // ID of the credit deal
     @SerialName("repay_amount") val amount: Asset, // The amount to repay
     @SerialName("credit_fee") val creditFee: Asset, // The credit fee relative to the amount to repay
-    @SerialName("extensions") val extensions: FutureExtensions, // Unused. Reserved for future use.
+    @SerialName("extensions") val extensions: FutureExtensions = emptyExtension(), // Unused. Reserved for future use.
 ) : Operation()
 
 /* 74 */ 

@@ -90,9 +90,7 @@ class SortedSetSerializer<T: Any>(
     override fun deserialize(decoder: Decoder): SortedSet<T> {
         return decoder.decodeStructure(descriptor) {
             val set = if (elementSerializer is StaticVarSerializer) {
-                sortedSetOf(Comparator { o1: T, o2: T ->
-                    elementSerializer.typelist.indexOf(o1::class) - elementSerializer.typelist.indexOf(o2::class)
-                })
+                sortedSetOf(elementSerializer.comparator)
             } else sortedSetOf<T>()
             while (true) {
                 val index = decodeElementIndex(descriptor)

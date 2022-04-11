@@ -46,12 +46,12 @@ data class BlindInput(
 @Serializable
 data class StealthConfirmation(
     @SerialName("one_time_key") val oneTimeKey: PublicKeyType,
-    @SerialName("to") val to: Optional<PublicKeyType>,
+    @SerialName("to") val to: Optional<PublicKeyType> = optional(),
     @SerialName("encrypted_memo") val encryptedMemo: BinaryData,
 ) {
     @Serializable
     internal data class MemoData(
-        @SerialName("from") val from: Optional<PublicKeyType>,
+        @SerialName("from") val from: Optional<PublicKeyType> = optional(),
         @SerialName("amount") val amount: Asset,
         @SerialName("blinding_factor") val blindingFactor: Sha256,
         @SerialName("commitment") val commitment: CommitmentType,
@@ -72,5 +72,7 @@ data class BlindOutput(
     /** only required if there is more than one blind output  */
     @SerialName("range_proof") val rangeProof: RangeProofType,
     @SerialName("owner") val owner: Authority,
-    @SerialName("stealth_memo") val stealthMemo: Optional<StealthConfirmation>,
+    @SerialName("stealth_memo") val stealthMemo: Optional<StealthConfirmation> = optional(),
 )
+
+//

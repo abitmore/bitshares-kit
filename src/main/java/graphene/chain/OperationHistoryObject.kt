@@ -13,7 +13,7 @@ data class K111_OperationHistoryObject(
     @SerialName("id")
     override val id: OperationHistoryId,
     @SerialName("op")
-    val op: JsonArray,
+    val op: Operation,
     @SerialName("result")
     val result: OperationResult,
     /** the block that caused this operation  */
@@ -42,7 +42,7 @@ data class K209_AccountTransactionHistoryObject(
     @SerialName("operation_id")
     val operation: OperationHistoryIdType,
     @SerialName("sequence")
-    val sequence: UInt64 = 0U, // the operation position within the given account
+    val sequence: UInt64, // = 0U, // the operation position within the given account
     @SerialName("next")
     val next: AccountTransactionHistoryIdType,
 

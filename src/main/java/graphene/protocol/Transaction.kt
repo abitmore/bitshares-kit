@@ -31,7 +31,7 @@ data class Transaction(
     @SerialName("operations")
     val operations: List<Operation>,
     @SerialName("extensions")
-    val extensions: FutureExtensions,
+    val extensions: FutureExtensions = emptyExtension(),
 ) : AbstractTransaction() {
 //    virtual ~transaction() = default;
 //
@@ -85,7 +85,7 @@ data class SignedTransaction(
     @SerialName("operations")
     val operations: List<Operation>,
     @SerialName("extensions")
-    val extensions: FutureExtensions,
+    val extensions: FutureExtensions = emptyExtension(),
     @SerialName("signatures") val signatures: List<SignatureType>
 ) : AbstractTransaction()
 //class signed_transaction : public transaction

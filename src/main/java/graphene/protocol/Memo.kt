@@ -1,12 +1,13 @@
 package graphene.protocol
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
 @Serializable
 data class MemoData(
-    val from: PublicKeyType,
-    val to: PublicKeyType,
+    @SerialName("from") val from: PublicKeyType,
+    @SerialName("to") val to: PublicKeyType,
     /**
      * 64 bit nonce format:
      * [  8 bits | 56 bits   ]
@@ -18,11 +19,11 @@ data class MemoData(
      * be unique with high probability as long as the generating host has a high-resolution clock OR a strong source
      * of entropy for generating private keys.
      */
-    val nonce: UInt64 = 0U,
+    @SerialName("nonce") val nonce: UInt64 = 0U,
     /**
      * This field contains the AES encrypted packed @ref memo_message
      */
-    val message: BinaryData, // FIXME: 2022/4/8 char[]
+    @SerialName("message") val message: BinaryData,
 ) {
 
 //    /// @note custom_nonce is for debugging only; do not set to a nonzero value in production

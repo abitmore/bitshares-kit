@@ -5,7 +5,7 @@ import kotlinx.serialization.json.*
 
 var GRAPHENE_JSON_PLATFORM_SERIALIZER = Json {
     ignoreUnknownKeys = false
-    encodeDefaults = true
+    encodeDefaults = false
 }
 
 var GRAPHENE_IO_PLATFORM_SERIALIZER = IO {

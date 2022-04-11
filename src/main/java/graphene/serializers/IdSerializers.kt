@@ -24,7 +24,10 @@ class ObjectSerializer<T: AbstractObject> : KSerializer<T> {
         val serializer = element["id"]!!.jsonPrimitive.content.toGrapheneType().toObjectClass().serializer()
         return decoder.json.decodeFromJsonElement(serializer, element) as T
     }
-    override fun serialize(encoder: Encoder, value: T) = TODO()
+    @OptIn(InternalSerializationApi::class)
+    override fun serialize(encoder: Encoder, value: T) {
+        (value::class.serializer() as KSerializer<T>).serialize(encoder, value)
+    }
 }
 
 class ObjectSerializer1 : JsonContentPolymorphicSerializer<AbstractObject>(AbstractObject::class) {

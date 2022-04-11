@@ -4,9 +4,10 @@ import graphene.chain.AbstractObject
 import graphene.chain.K102_AccountObject
 
 
-private fun String.toVote(): VoteIdType {
-    return VoteIdType.fromStringId(this)
-}
+fun String.toVote(): VoteIdType = VoteIdType(
+    substringBefore(':').toInt().let { VoteIdType.VoteType.values()[it] },
+    substringAfter(':').toUInt()
+)
 
 fun ULong.toAccount() = AccountId(this)
 
