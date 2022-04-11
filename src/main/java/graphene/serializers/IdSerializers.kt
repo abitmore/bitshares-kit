@@ -12,6 +12,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.*
 import kotlinx.serialization.serializer
+import kotlin.reflect.KClass
 
 internal val ID_TYPE_DESCRIPTOR = PrimitiveSerialDescriptor("ObjectIdType", PrimitiveKind.STRING)
 
@@ -37,14 +38,18 @@ class ObjectSerializer1 : JsonContentPolymorphicSerializer<AbstractObject>(Abstr
     }
 }
 
-class ObjectIdSerializer<T: ObjectId> : KSerializer<T> {
+class ObjectIdSerializer<T: ObjectId>() : KSerializer<T> {
     override val descriptor: SerialDescriptor = ID_TYPE_DESCRIPTOR
     override fun deserialize(decoder: Decoder): T =
-        decoder.decodeString().toGrapheneObjectId()
+        when (decoder) {
+            is JsonDecoder -> decoder.decodeString().toGrapheneObjectId()
+            is IODecoder -> TODO()
+            else -> TODO()
+        }
     override fun serialize(encoder: Encoder, value: T) {
         when (encoder) {
             is JsonEncoder -> encoder.encodeString(value.standardId)
-            is IOEncoder -> encoder.encodeVarInt(value.instance.toLong())
+            is IOEncoder -> encoder.encodeVarLong(value.instance.toLong())
             else -> TODO()
         }
     }

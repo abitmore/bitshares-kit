@@ -62,7 +62,7 @@ object VarLongSerializer : KSerializer<Int64> {
     override fun serialize(encoder: Encoder, value: Int64) =
         when (encoder) {
             is JsonEncoder -> encoder.encodeLong(value)
-            is IOEncoder -> encoder.encodeVarInt(value)
+            is IOEncoder -> encoder.encodeVarLong(value)
             else -> TODO()
         }
     override fun deserialize(decoder: Decoder): Int64 =
@@ -93,7 +93,7 @@ object ULongVarIntSerializer : KSerializer<ULong> {
     override fun serialize(encoder: Encoder, value: ULong) =
         when (encoder) {
             is JsonEncoder -> elementSerializer.serialize(encoder, value)
-            is IOEncoder -> encoder.encodeVarInt(value.toLong())
+            is IOEncoder -> encoder.encodeVarLong(value.toLong())
             else -> TODO()
         }
     override fun deserialize(decoder: Decoder): ULong =
