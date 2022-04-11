@@ -50,7 +50,6 @@ class ObjectIdSerializer<T: ObjectId> : KSerializer<T> {
     }
 }
 
-
 object ObjectIdDefaultSerializer : KSerializer<ObjectId> {
     override val descriptor: SerialDescriptor = ID_TYPE_DESCRIPTOR
     override fun deserialize(decoder: Decoder): ObjectId =

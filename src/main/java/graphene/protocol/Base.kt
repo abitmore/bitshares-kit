@@ -42,25 +42,31 @@ class ExtensionSerializer<T: Extension<T>>(val elementSerializer: KSerializer<T>
             is IOEncoder -> elementSerializer.serialize(encoder, value as T)
         }
     }
-
 }
 
-
-typealias OperationResult = @Serializable(with = OperationResultSerializer::class) Any
+@Serializable(with = OperationResultSerializer::class)
+sealed class OperationResult
 
 @Serializable
 data class VoidResult(
     @Transient val reserved: Unit = Unit,
 ) : OperationResult()
 
+@Serializable(with = ObjectIdResultSerializer::class)
+data class ObjectIdResult(
+    @SerialName("id") val id: ObjectIdType,
+) : OperationResult()
+
+@Serializable(with = AssetResultSerializer::class)
+data class AssetResult(
+    @SerialName("asset") val asset: Asset,
+) : OperationResult()
+
 @Serializable
 data class GenericOperationResult(
-    @SerialName("new_objects")
-    val newObjects: FlatSet<ObjectIdType>,
-    @SerialName("updated_objects")
-    val updatedObjects: FlatSet<ObjectIdType>,
-    @SerialName("removed_objects")
-    val removedObjects: FlatSet<ObjectIdType>,
+    @SerialName("new_objects") val newObjects: FlatSet<ObjectIdType>,
+    @SerialName("updated_objects") val updatedObjects: FlatSet<ObjectIdType>,
+    @SerialName("removed_objects") val removedObjects: FlatSet<ObjectIdType>,
 ) : OperationResult()
 
 @Serializable
@@ -79,18 +85,33 @@ data class ExtendableOperationResultDtl(
     @SerialName("paid") val paid: Optional<List<Asset>> = optional(),
     @SerialName("received") val received: Optional<List<Asset>> = optional(),
     @SerialName("fees") val fees: Optional<List<Asset>> = optional(),
-)
+) : OperationResult()
 
 object OperationResultSerializer : StaticVarSerializer<OperationResult>(
     listOf(
         /* 0 */ VoidResult::class,
-        /* 1 */ ObjectIdType::class,
-        /* 2 */ Asset::class,
+        /* 1 */ ObjectIdResult::class,
+        /* 2 */ AssetResult::class,
         /* 3 */ GenericOperationResult::class,
         /* 4 */ GenericExchangeOperationResult::class,
         /* 5 */ ExtendableOperationResultDtl::class,
-    ),
-    mapOf(
-        ObjectIdType::class to ObjectIdDefaultSerializer
     )
 )
+
+internal object ObjectIdResultSerializer : KSerializer<ObjectIdResult> {
+    val elementSerializer = ObjectIdDefaultSerializer
+    override val descriptor: SerialDescriptor = elementSerializer.descriptor
+    override fun serialize(encoder: Encoder, value: ObjectIdResult) =
+        elementSerializer.serialize(encoder, value.id.id)
+    override fun deserialize(decoder: Decoder): ObjectIdResult =
+        ObjectIdResult(elementSerializer.deserialize(decoder))
+}
+
+internal object AssetResultSerializer : KSerializer<AssetResult> {
+    val elementSerializer = Asset.serializer()
+    override val descriptor: SerialDescriptor = elementSerializer.descriptor
+    override fun serialize(encoder: Encoder, value: AssetResult) =
+        elementSerializer.serialize(encoder, value.asset)
+    override fun deserialize(decoder: Decoder): AssetResult =
+        AssetResult(elementSerializer.deserialize(decoder))
+}

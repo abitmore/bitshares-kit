@@ -427,7 +427,7 @@ data class BitassetOptions(
     @SerialName("maximum_force_settlement_volume")
     val maximumForceSettlementVolume: UInt16,// = GRAPHENE_DEFAULT_FORCE_SETTLEMENT_MAX_VOLUME,
     @SerialName("short_backing_asset")
-    val shortBackingAsset: AssetId,
+    val shortBackingAsset: AssetIdType,
     @SerialName("extensions")
     val extension: Extensions,
 ) {

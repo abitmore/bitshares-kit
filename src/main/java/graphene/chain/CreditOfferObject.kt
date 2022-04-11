@@ -56,9 +56,9 @@ data class K122_CreditDealObject(
     @SerialName("collateral_amount")
     val collateralAmount: ShareType, //< How much funds in collateral
     @SerialName("fee_rate")
-    val fee_rate: UInt32, // = 0U //< Fee rate, the demominator is GRAPHENE_FEE_RATE_DENOM
+    val feeRate: UInt32, // = 0U //< Fee rate, the demominator is GRAPHENE_FEE_RATE_DENOM
     @SerialName("latest_repay_time") @Serializable(TimePointSecSerializer::class)
-    val latest_repay_time: Instant, //< The deadline when the debt should be repaid
+    val latestRepayTime: Instant, //< The deadline when the debt should be repaid
 ) : AbstractObject(), CreditDealIdType {
 
 }

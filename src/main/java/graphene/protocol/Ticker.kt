@@ -14,6 +14,7 @@ enum class TicketType {
     @SerialName("ticket_type_count") TICKET_TYPE_COUNT,
 }
 
+// TODO: 2022/4/11 move to chain
 @Serializable
 enum class TicketStatus {
     @SerialName("charging") CHARGING,

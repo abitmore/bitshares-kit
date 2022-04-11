@@ -67,10 +67,10 @@ data class LinearVestingPolicy(
     val beginTimestamp: Instant,
     // No amount may be withdrawn before this many seconds of the vesting period have elapsed.
     @SerialName("vesting_cliff_seconds")
-    val vestingCliffSeconds: UInt32 = 0U,
+    val vestingCliffSeconds: UInt32, // = 0U,
     // Duration of the vesting period, in seconds. Must be greater than 0 and greater than vesting_cliff_seconds.
     @SerialName("vesting_duration_seconds")
-    val vestingDurationSeconds: UInt32 = 0U,
+    val vestingDurationSeconds: UInt32, // = 0U,
     // The total amount of asset to vest.
     @SerialName("begin_balance")
     val beginBalance: ShareType,
@@ -97,14 +97,14 @@ data class LinearVestingPolicy(
 @Serializable
 data class CddVestingPolicy(
     @SerialName("vesting_seconds")
-    val vesting_seconds: UInt32? = 0U,
+    val vestingSeconds: UInt32, // = 0U,
     @SerialName("coin_seconds_earned")
-    val coin_seconds_earned: UInt128,
+    val coinSecondsEarned: UInt128,
     /** while coindays may accrue over time, none may be claimed before first_claim date  */
     @SerialName("start_claim") @Serializable(TimePointSecSerializer::class)
-    val start_claim: Instant,
+    val startClaim: Instant,
     @SerialName("coin_seconds_earned_last_update") @Serializable(TimePointSecSerializer::class)
-    val coin_seconds_earned_last_update: Instant,
+    val coinSecondsEarnedLastUpdate: Instant,
 ) : VestingPolicy()
 //    /**
 //     * Compute coin_seconds_earned.  Used to
@@ -130,7 +130,7 @@ data class CddVestingPolicy(
 
 
 @Serializable
-class InstantVestingPolicy(
+data class InstantVestingPolicy(
     @Transient
     val reserved: Unit = Unit
 ) : VestingPolicy() {

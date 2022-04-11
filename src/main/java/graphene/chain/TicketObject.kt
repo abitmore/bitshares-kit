@@ -6,7 +6,6 @@ import kotlinx.datetime.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-
 @Serializable
 data class K118_TicketObject(
     @SerialName("id")
@@ -78,13 +77,6 @@ data class K118_TicketObject(
     ///// Recalculate value of the ticket
     //void update_value( ticket_version version );
 
-}
-
-@Serializable
-enum class TicketStatus {
-    @SerialName("charging") CHARGING,
-    @SerialName("stable") STABLE,
-    @SerialName("withdrawing") WITHDRAWING,
 }
 
 

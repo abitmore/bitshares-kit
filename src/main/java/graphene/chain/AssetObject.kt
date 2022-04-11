@@ -87,7 +87,7 @@ data class K204_AssetBitassetDataObject(
     override val currentInitialCollateralization: PriceType,
     // True if this asset implements a @ref prediction_market
     @SerialName("is_prediction_market")
-    override val isPredictionMarket: Boolean = false,
+    override val isPredictionMarket: Boolean, // = false,
     // This is the volume of this asset which has been force-settled this maintanence interval
     @SerialName("force_settled_volume")
     override val forceSettledVolume: ShareType,
@@ -109,10 +109,10 @@ data class K204_AssetBitassetDataObject(
     override val individualSettlementFund: ShareType,
     @SerialName("asset_cer_updated")
     // Track whether core_exchange_rate in corresponding @ref asset_object has updated
-    override val assetCerUpdated: Boolean = false,
+    override val assetCerUpdated: Boolean, // = false,
     @SerialName("feed_cer_updated")
     // Track whether core exchange rate in current feed has updated
-    override val feedCerUpdated: Boolean = false,
+    override val feedCerUpdated: Boolean, // = false,
 ) : AbstractObject(), AssetBitassetDataIdType {
 //    // @return whether @ref current_feed is different from @ref median_feed
 ////    bool is_current_feed_price_capped()const

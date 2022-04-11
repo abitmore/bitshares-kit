@@ -13,21 +13,21 @@ data class K111_OperationHistoryObject(
     @SerialName("id")
     override val id: OperationHistoryId,
     @SerialName("op")
-    val op: Operation,
+    val operation: Operation,
     @SerialName("result")
     val result: OperationResult,
     /** the block that caused this operation  */
     @SerialName("block_num")
-    val blockNum: UInt32, // = 0
+    val blockHeight: UInt32, // = 0
     /** the transaction in the block  */
     @SerialName("trx_in_block")
-    val trxInBlock: UInt16, // = 0
+    val transactionCount: UInt16, // = 0
     /** the operation within the transaction  */
     @SerialName("op_in_trx")
-    val opInTrx: UInt16, // = 0
+    val operationCount: UInt16, // = 0
     /** any virtual operations implied by operation in block  */
     @SerialName("virtual_op")
-    val virtualOp: UInt32, // = 0
+    val virtualOperation: UInt32, // = 0
 ) : AbstractObject(), OperationHistoryIdType {
 }
 
