@@ -24,16 +24,12 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 
-class GrapheneClient(val node: Node, var debug: Boolean = true) : Broadcaster, LoginBroadcaster {
+class GrapheneClient(val node: Node, var debug: Boolean = false) : Broadcaster, LoginBroadcaster {
 
     private val session = Job()
     private val clientScope = CoroutineScope(Dispatchers.IO + session)
 
-    private val sendScope = CoroutineScope(Dispatchers.IO.limitedParallelism(10) + session)
-    private val receiveScope = CoroutineScope(Dispatchers.IO.limitedParallelism(10) + session)
-
     override val broadcastScope = CoroutineScope(Dispatchers.IO + session)
-
 
     private fun <T> T.console(title: Any = System.currentTimeMillis()) = apply { if (debug) listOf("GrapheneClient", title, this.toString()).info() }
 
@@ -104,77 +100,85 @@ class GrapheneClient(val node: Node, var debug: Boolean = true) : Broadcaster, L
 
     private suspend fun DefaultClientWebSocketSession.sendRPC() {
         console("Start Calling >>>")
-        while (true) {
+        while (isActive) {
+            val struct = sendingChannel.receive()
+            val socketCall = buildSocketCall(struct)
             try {
-                val struct = sendingChannel.receive()
-                val socketCall = buildSocketCall(struct)
-                try {
-                    callback(socketCall.id, struct.cont)
-                    GRAPHENE_JSON_PLATFORM_SERIALIZER.encodeToString(socketCall).console("Call >>>")
-                    sendSerialized(socketCall)
-                } catch (e: Exception) {
-                    callbackMap.remove(socketCall.id)
-                    fallbackChannel.send(struct)
-                    sendingChannel.consumeEach { fallbackChannel.send(it) }
-
-                    e.printStackTrace()
-                    break
-                }
-            } catch (e: Throwable) {
-                e.printStackTrace()
-                break
+                callback(socketCall.id, struct.cont)
+                GRAPHENE_JSON_PLATFORM_SERIALIZER.encodeToString(socketCall).console("Call >>>")
+                sendSerialized(socketCall)
+            } catch (e: Exception) {
+                callbackMap.remove(socketCall.id)
+                sendingChannel.send(struct)
+                throw e
             }
         }
+
     }
 
     private suspend fun DefaultClientWebSocketSession.receiveRPC() {
         console("Start Receiving <<<")
-        while (true) {
-            try {
-                val result = receiveDeserialized<SocketResult>().console("Recv <<<")
-                callback(result.id, result)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                e.console("================ WEBSOCKET STOP ================")
-                break
-            }
+        while (isActive) {
+            val result = receiveDeserialized<SocketResult>().console("Recv <<<")
+            callback(result.id, result)
         }
+//        while (true) {
+//            try {
+//                val result = receiveDeserialized<SocketResult>().console("Recv <<<")
+//                callback(result.id, result)
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//                e.console("================ WEBSOCKET STOP ================")
+//                break
+//            }
+//        }
     }
 
     private suspend fun launchSocket() {
         client.wss(node.url) {
-            try {
-                val sendJob = sendScope.launch { sendRPC() }
-                val receiveJob = receiveScope.launch { receiveRPC() }
-                login(node).let { if (!it) throw SocketErrorException("Incorrect node params!") }
-                getIdentifiers().let { identifiers.putAll(it) }
-                open()
-                listOf(sendJob, receiveJob).joinAll()
-            } catch (e: Throwable) {
-                e.printStackTrace()
-            }
+            val sendJob = launch { sendRPC() }
+            val receiveJob = launch { receiveRPC() }
+            login(node).let { if (!it) throw SocketErrorException("Incorrect node params!") }
+            getIdentifiers().let { identifiers.putAll(it) }
+            open()
+            listOf(sendJob, receiveJob).joinAll()
+//            try {
+//            } catch (e: Throwable) {
+//                e.printStackTrace()
+//            }
         }
     }
 
     // public
     fun start() {
         clientScope.launch {
-            launchSocket() // TODO: 2022/4/1 java.net.SocketException: Bad file descriptor
+            supervisorScope {
+                launchSocket()
+            }
+             // TODO: 2022/4/1 java.net.SocketException: Bad file descriptor
         }
     }
 
     fun stop(reason: Exception = SocketManualStopException()) {
         "STOP() CALLED FROM".console()
-        try {
-            sendingChannel.close(reason)
-            fallbackChannel.close(reason)
-            session.cancel()
-            waiting.forEach {
-                it.resumeWithException(reason)
-            }
-            waiting.clear()
-        } catch (e: Throwable) {
+        clientScope.launch {
+            try {
+                sendingChannel.consumeEach {
+                    fallbackChannel.send(it)
+                }
+                sendingChannel.close(reason)
+//                fallbackChannel.close(reason)
+                session.cancel()
+                waiting.forEach {
+                    it.resumeWithException(reason)
+                }
+                waiting.clear()
+                callbackMap.clear()
+            } catch (e: Throwable) {
 //            e.printStackTrace()
+            }
+
         }
+
     }
 }
