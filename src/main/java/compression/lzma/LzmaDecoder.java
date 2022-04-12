@@ -1,11 +1,11 @@
 package compression.lzma;
 
+import compression.lz.OutWindow;
+import compression.range_coder.BitTreeDecoder;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import compression.lz.OutWindow;
-import compression.range_coder.BitTreeDecoder;
 
 public class LzmaDecoder {
     OutWindow mOutWindow = new OutWindow();

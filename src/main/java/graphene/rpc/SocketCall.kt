@@ -27,7 +27,6 @@ data class SocketCall(
         const val METHOD_NOTICE = "notice"
     }
 
-
 }
 
 

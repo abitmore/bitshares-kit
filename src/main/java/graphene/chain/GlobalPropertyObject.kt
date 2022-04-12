@@ -1,7 +1,6 @@
 package graphene.chain
 
 import graphene.protocol.*
-import graphene.protocol.Optional
 import graphene.serializers.TimePointSecSerializer
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName

@@ -2,7 +2,10 @@ package graphene.protocol
 
 import bitcoinkit.ECKey
 import bitcoinkit.Utils
-import graphene.extension.*
+import graphene.extension.decodeBase58
+import graphene.extension.encodeBase58
+import graphene.extension.ripemd160
+import graphene.extension.sha512
 import graphene.serializers.IOEncoder
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable

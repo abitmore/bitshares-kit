@@ -1,16 +1,20 @@
 package graphene.rpc
 
+import graphene.app.API
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
+import kotlinx.serialization.json.JsonArray
+import kotlin.coroutines.suspendCoroutine
 
-class MultiClient : AbstractClient() {
+class MultiClient : Broadcaster, DatabaseBroadcaster {
 
     private val channel: Channel<BroadcastStruct> = Channel(UNLIMITED)
 
     val clients = mutableListOf<GrapheneClient>()
 
     val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    override val broadcastScope: CoroutineScope = scope
 
     fun switch(node: Node) {
         clients.forEach {
@@ -18,7 +22,7 @@ class MultiClient : AbstractClient() {
         }
         clients.clear()
 
-        val client = GrapheneClient(node, false)
+        val client = GrapheneClient(node)
         client.start()
         clients.add(client)
 
@@ -44,7 +48,6 @@ class MultiClient : AbstractClient() {
                     break
                 }
             }
-//            throw Exception()
         }
 
     }
@@ -57,11 +60,15 @@ class MultiClient : AbstractClient() {
         clients.clear()
     }
 
+    override suspend fun broadcast(method: API, params: JsonArray) : SocketResult {
+        return suspendCoroutine {
+            val struct = BroadcastStruct(method, false, params, it)
+            scope.launch { broadcast(struct) }
+        }
+    }
     override suspend fun broadcast(struct: BroadcastStruct) {
         channel.send(struct)
     }
-
-
 
 
 }

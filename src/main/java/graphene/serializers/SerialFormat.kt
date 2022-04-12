@@ -1,7 +1,7 @@
 package graphene.serializers
 
 import kotlinx.io.core.ByteOrder
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
 
 var GRAPHENE_JSON_PLATFORM_SERIALIZER = Json {
     ignoreUnknownKeys = false

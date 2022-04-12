@@ -51,6 +51,7 @@ enum class LoginAPI: API {                  // 0x01
     override val type: APIType = APIType.LOGIN
     override val nameString: String = name.lowercase()
 }
+
 enum class BlockAPI: API {                  // 0x02
     ;
     override val type: APIType = APIType.BLOCK

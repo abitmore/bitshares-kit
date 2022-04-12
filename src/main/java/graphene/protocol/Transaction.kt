@@ -86,7 +86,8 @@ data class SignedTransaction(
     val operations: List<Operation>,
     @SerialName("extensions")
     val extensions: FutureExtensions = emptyExtension(),
-    @SerialName("signatures") val signatures: List<SignatureType>
+    @SerialName("signatures")
+    val signatures: List<SignatureType>
 ) : AbstractTransaction()
 //class signed_transaction : public transaction
 //{

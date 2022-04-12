@@ -1,9 +1,9 @@
 package compression.lzma;
 
-import java.io.IOException;
-
 import compression.range_coder.BitTreeEncoder;
 import compression.tools.Progress;
+
+import java.io.IOException;
 
 public class LzmaEncoder {
     public static final int EMatchFinderTypeBT2 = 0;

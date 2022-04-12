@@ -2,14 +2,18 @@ package graphene.serializers
 
 import graphene.protocol.FlatMap
 import graphene.protocol.FlatPair
-import graphene.protocol.Vector
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.descriptors.*
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.SerialKind
+import kotlinx.serialization.descriptors.StructureKind
+import kotlinx.serialization.descriptors.listSerialDescriptor
 import kotlinx.serialization.encoding.*
 import kotlinx.serialization.encoding.CompositeDecoder.Companion.DECODE_DONE
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonEncoder
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.jsonArray
 import java.util.*
-import kotlin.Comparator
 
 internal fun flatPairSerialDescriptor(
     oddDescriptor: SerialDescriptor,

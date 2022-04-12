@@ -18,10 +18,6 @@ import org.bouncycastle.math.ec.custom.sec.SecP256K1Curve
 import org.bouncycastle.util.encoders.Base64
 import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.lang.ClassCastException
-import java.lang.IllegalArgumentException
-import java.lang.IllegalStateException
-import java.lang.RuntimeException
 import java.math.BigInteger
 import java.nio.charset.StandardCharsets
 import java.security.SecureRandom

@@ -5,4 +5,9 @@ import kotlinx.serialization.json.JsonArray
 import kotlin.coroutines.Continuation
 
 
-data class BroadcastStruct(val method: API, val subscribe: Boolean, val params: JsonArray, val cont: Continuation<SocketResult>)
+data class BroadcastStruct(
+    val method: API,
+    val subscribe: Boolean,
+    val params: JsonArray,
+    val cont: Continuation<SocketResult>
+)

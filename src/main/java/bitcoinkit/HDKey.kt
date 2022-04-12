@@ -1,7 +1,6 @@
 package bitcoinkit
 
 import bitcoinkit.Utils.doubleDigest
-import java.lang.StringBuilder
 import java.math.BigInteger
 import java.util.*
 

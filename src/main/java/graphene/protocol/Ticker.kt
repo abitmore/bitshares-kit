@@ -1,6 +1,5 @@
 package graphene.protocol
 
-import kotlinx.serialization.SerialInfo
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

@@ -1,12 +1,8 @@
 package graphene.chain
 
 import graphene.protocol.*
-import graphene.serializers.ObjectIdDefaultSerializer
-import graphene.serializers.StaticVarSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
-import kotlinx.serialization.json.JsonArray
 
 @Serializable
 data class K111_OperationHistoryObject(

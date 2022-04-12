@@ -1,6 +1,9 @@
 package graphene.chain
 
-import graphene.protocol.*
+import graphene.protocol.SignedTransaction
+import graphene.protocol.TransactionHistoryId
+import graphene.protocol.TransactionHistoryIdType
+import graphene.protocol.TransactionIdType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

@@ -1,6 +1,7 @@
 package graphene.chain
 
-import graphene.protocol.*
+import graphene.protocol.CustomId
+import graphene.protocol.CustomIdType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

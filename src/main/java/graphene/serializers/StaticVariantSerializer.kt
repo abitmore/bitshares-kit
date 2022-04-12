@@ -1,7 +1,11 @@
 package graphene.serializers
 
-import graphene.protocol.*
-import kotlinx.serialization.*
+import graphene.protocol.Int32
+import graphene.protocol.Int64
+import graphene.protocol.toInt32
+import graphene.protocol.toInt64
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.*
 import kotlinx.serialization.encoding.Decoder
@@ -10,6 +14,8 @@ import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.encoding.encodeStructure
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonEncoder
+import kotlinx.serialization.serializer
+import kotlinx.serialization.serializerOrNull
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createType
 

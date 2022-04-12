@@ -1,6 +1,8 @@
 package graphene.chain
 
-import graphene.protocol.*
+import graphene.protocol.AccountIdType
+import graphene.protocol.SpecialAuthorityId
+import graphene.protocol.SpecialAuthorityIdType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

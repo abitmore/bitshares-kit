@@ -1,6 +1,8 @@
 package graphene.chain
 
-import graphene.protocol.*
+import graphene.protocol.WitnessIdType
+import graphene.protocol.WitnessScheduleId
+import graphene.protocol.WitnessScheduleIdType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

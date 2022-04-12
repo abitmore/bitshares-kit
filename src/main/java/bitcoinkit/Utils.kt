@@ -6,7 +6,6 @@ import org.bouncycastle.crypto.macs.HMac
 import org.bouncycastle.crypto.params.KeyParameter
 import java.io.IOException
 import java.io.InputStream
-import java.lang.RuntimeException
 import java.math.BigInteger
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException

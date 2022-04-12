@@ -12,7 +12,6 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.*
 import kotlinx.serialization.serializer
-import kotlin.reflect.KClass
 
 internal val ID_TYPE_DESCRIPTOR = PrimitiveSerialDescriptor("ObjectIdType", PrimitiveKind.STRING)
 
