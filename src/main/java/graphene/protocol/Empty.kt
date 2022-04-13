@@ -40,7 +40,7 @@ val INVALID_ACCOUNT_OBJECT = K102_AccountObject(
     emptySet(), //    val whiteListedAccounts: Set<K102_AccountType>,
     emptySet(), //    val blackListedAccounts: Set<K102_AccountType>,
     //
-    emptyIdType(), //    val ack_vb: K113_VestingBalanceIdType = emptyIdType(),
+    emptyIdType(), //    val ackVb: K113_VestingBalanceIdType = emptyIdType(),
     //
     NoSpecialAuthority.INVALID, //    val ownerSpecialAuthority: SpecialAuthority,
     NoSpecialAuthority.INVALID, //    val activeSpecialAuthority: SpecialAuthority,

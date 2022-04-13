@@ -77,7 +77,7 @@ data class GenericExchangeOperationResult(
 
 @Serializable
 data class ExtendableOperationResultDtl(
-    @SerialName("impacted_accounts") val impacted_accounts: Optional<FlatSet<AccountIdType>> = optional(),
+    @SerialName("impacted_accounts") val impactedAccounts: Optional<FlatSet<AccountIdType>> = optional(),
     @SerialName("new_objects") val newObjects: Optional<FlatSet<ObjectIdType>> = optional(),
     @SerialName("updated_objects") val updatedObjects: Optional<FlatSet<ObjectIdType>> = optional(),
     @SerialName("removed_objects") val removedObjects: Optional<FlatSet<ObjectIdType>> = optional(),

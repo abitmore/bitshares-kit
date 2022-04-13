@@ -13,7 +13,6 @@ import kotlin.jvm.Throws
 
 interface AllBroadcaster : LoginBroadcaster, DatabaseBroadcaster
 
-val SOCKET_TIMEOUT = 5000L
 @OptIn(ExperimentalCoroutinesApi::class)
 interface Broadcaster {
     val broadcastScope: CoroutineScope

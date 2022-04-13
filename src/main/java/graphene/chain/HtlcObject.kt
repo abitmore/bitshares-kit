@@ -27,13 +27,13 @@ data class K116_HtlcObject(
     )
     @Serializable
     data class ConditionInfo(
-        @SerialName("hash_lock") val hash_lock: HashLockInfo,
-        @SerialName("time_lock") val time_lock: TimePointSec,
+        @SerialName("hash_lock") val hashLock: HashLockInfo,
+        @SerialName("time_lock") val timeLock: TimePointSec,
     ) {
         @Serializable
         data class HashLockInfo(
-            @SerialName("preimage_hash") val preimage_hash: HtlcHash,
-            @SerialName("preimage_size") val preimage_size: UShort,
+            @SerialName("preimage_hash") val preimageHash: HtlcHash,
+            @SerialName("preimage_size") val preimageSize: UShort,
         )
         @Serializable
         data class TimePointSec(

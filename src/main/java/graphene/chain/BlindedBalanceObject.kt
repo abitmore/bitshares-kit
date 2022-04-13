@@ -11,7 +11,7 @@ data class K210_BlindedBalanceObject(
     @SerialName("commitment")
     val commitment: CommitmentType, // fc::ecc::commitment_type
     @SerialName("asset_id")
-    val asset_id: AssetIdType,
+    val assetId: AssetIdType,
     @SerialName("owner")
     val owner: Authority,
 ) : AbstractObject(), BlindedBalanceIdType {

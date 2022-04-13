@@ -166,13 +166,13 @@ data class PriceFeed(
     @SerialName("settlement_price")
     val settlementPrice: PriceType,
     @SerialName("maintenance_collateral_ratio")
-    val maintenance_collateral_ratio: UInt16, // = GRAPHENE_DEFAULT_MAINTENANCE_COLLATERAL_RATIO.toUInt16(),
+    val maintenanceCollateralRatio: UInt16, // = GRAPHENE_DEFAULT_MAINTENANCE_COLLATERAL_RATIO.toUInt16(),
     /** Fixed point between 1.000 and 10.000, implied fixed point denominator is GRAPHENE_COLLATERAL_RATIO_DENOM */
     @SerialName("maximum_short_squeeze_ratio")
-    val maximum_short_squeeze_ratio: UInt16, // = GRAPHENE_DEFAULT_MAX_SHORT_SQUEEZE_RATIO.toUInt16(),
+    val maximumShortSqueezeRatio: UInt16, // = GRAPHENE_DEFAULT_MAX_SHORT_SQUEEZE_RATIO.toUInt16(),
     /** Price at which automatically exchanging this asset for CORE from fee pool occurs (used for paying fees) */
     @SerialName("core_exchange_rate")
-    val core_exchange_rate: PriceType,
+    val coreExchangeRate: PriceType,
     /** Fixed point between 1.000 and 10.000, implied fixed point denominator is GRAPHENE_COLLATERAL_RATIO_DENOM */
 ) {
 

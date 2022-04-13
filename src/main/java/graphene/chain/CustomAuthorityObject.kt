@@ -16,15 +16,15 @@ data class K117_CustomAuthorityObject(
     @SerialName("enabled")
     val enabled: Boolean,
     @SerialName("idvalid_from") @Serializable(TimePointSecSerializer::class)
-    val valid_from: Instant,
+    val validFrom: Instant,
     @SerialName("valid_to") @Serializable(TimePointSecSerializer::class)
-    val valid_to: Instant,
+    val validTo: Instant,
     @SerialName("operation_type")
-    val operation_type: UnsignedInt,
+    val operationType: UnsignedInt,
     @SerialName("auth")
     val auth: Authority,
     @SerialName("restrictions")
     val restrictions: FlatMap<UInt16, Restriction>,
     @SerialName("restriction_counter")
-    val restriction_counter: UInt16 = 0U,
+    val restrictionCounter: UInt16 = 0U,
 ) : AbstractObject(), CustomAuthorityIdType

@@ -33,7 +33,6 @@ data class K118_TicketObject(
 ) : AbstractObject(), TicketIdType {
 
     companion object {
-
         val lockForeverUpdateSteps: UInt32 = 4U
         val secondsPerLockForeverUpdateStep: UInt32 = 180U * 86400U
         val secondsPerChargingStep: UInt32 = 15U * 86400U
@@ -48,12 +47,6 @@ data class K118_TicketObject(
         //    return ( version == ticket_v1 ? _value_multiplier_v1[ static_cast<uint8_t>(i) ]
         //    : _value_multiplier_v2[ static_cast<uint8_t>(i) ] );
         //}
-    }
-
-    fun a() {
-        "2010-06-01T22:19:44.475Z".toInstant()
-        "2010-06-01T22:19:44".toLocalDateTime()
-        "2010-06-01".toLocalDate()
     }
 
     //// Configurations
@@ -84,7 +77,8 @@ data class K118_TicketObject(
 
 
 // Version of a ticket
+@Serializable
 enum class TicketVersion(val version: Int32) {
-    TICKET_V1(1),
-    TICKET_V2(2),
+    TICKET_V1(0x01),
+    TICKET_V2(0x02),
 }
