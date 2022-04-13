@@ -15,7 +15,7 @@ data class K110_ProposalObject(
     @SerialName("review_period_time")
     val reviewPeriodTime: Optional<@Serializable(with = TimePointSecSerializer::class) Instant> = optional(),
     @SerialName("proposed_transaction")
-    val proposedTransaction: Transaction,
+    val proposedTransaction: K_Transaction,
     @SerialName("required_active_approvals")
     val requiredActiveApprovals: FlatSet<AccountIdType>,
     @SerialName("available_active_approvals")

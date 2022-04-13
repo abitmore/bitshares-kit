@@ -10,7 +10,7 @@ sealed class AbstractTransaction() {
 }
 
 @Serializable
-data class Transaction(
+data class K_Transaction(
     /**
      * Least significant 16 bits from the reference block number.
      */
