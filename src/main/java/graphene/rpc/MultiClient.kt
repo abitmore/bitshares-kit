@@ -63,11 +63,13 @@ class MultiClient : Broadcaster, DatabaseBroadcaster {
     override suspend fun broadcast(method: API, params: JsonArray) : SocketResult {
         return suspendCoroutine {
             val struct = BroadcastStruct(method, false, params, it)
-            scope.launch { broadcast(struct) }
+            broadcast(struct)
         }
     }
-    override suspend fun broadcast(struct: BroadcastStruct) {
-        channel.send(struct)
+    override fun broadcast(struct: BroadcastStruct) {
+        scope.launch {
+            channel.send(struct) // TODO: 2022/4/13  
+        }
     }
 
 

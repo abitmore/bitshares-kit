@@ -4,23 +4,26 @@ import graphene.app.API
 import graphene.serializers.GRAPHENE_JSON_PLATFORM_SERIALIZER
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlin.jvm.Throws
 
+interface AllBroadcaster : LoginBroadcaster, DatabaseBroadcaster
 
+val SOCKET_TIMEOUT = 5000L
 @OptIn(ExperimentalCoroutinesApi::class)
 interface Broadcaster {
     val broadcastScope: CoroutineScope
     suspend fun broadcast(method: API, params: JsonArray) : SocketResult
-    suspend fun broadcast(struct: BroadcastStruct)
+    fun broadcast(struct: BroadcastStruct)
 }
 
 /* ================================ begin ================================ */
 
-inline fun <reified R> Broadcaster.decodeParamsFromJsonElementOrThrow(result: SocketResult) : R {
+inline fun <reified R> decodeParamsFromJsonElementOrThrow(result: SocketResult) : R {
     return when (result) {
         is SocketCallback -> GRAPHENE_JSON_PLATFORM_SERIALIZER.decodeFromJsonElement(result.result)
         is SocketError ->  throw SocketErrorException(result)

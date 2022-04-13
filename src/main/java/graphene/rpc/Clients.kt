@@ -24,14 +24,24 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 
-class GrapheneClient(val node: Node, var debug: Boolean = false) : Broadcaster, LoginBroadcaster {
+data class ClientConfiguration(
+    val node: Node,
+    val debug: Boolean = false,
+    val fallback: Boolean = false
+)
 
-    private val session = Job()
-    private val clientScope = CoroutineScope(Dispatchers.IO + session)
+
+class GrapheneClient(val conf: ClientConfiguration) : AllBroadcaster {
+
+    constructor(node: Node) : this(ClientConfiguration(node))
+    private val node = conf.node
+
+    val session = SupervisorJob()
+    val clientScope = CoroutineScope(Dispatchers.IO + session)
 
     override val broadcastScope = CoroutineScope(Dispatchers.IO + session)
 
-    private fun <T> T.console(title: Any = System.currentTimeMillis()) = apply { if (debug) listOf("GrapheneClient", title, this.toString()).info() }
+    private fun <T> T.console(title: Any = System.currentTimeMillis()) = apply { if (conf.debug) listOf("GrapheneClient", title, this.toString()).info() }
 
     private val sequence: AtomicInteger = AtomicInteger(0)
     private val connected: AtomicBoolean = AtomicBoolean(false)
@@ -74,27 +84,35 @@ class GrapheneClient(val node: Node, var debug: Boolean = false) : Broadcaster, 
         return SocketCall(id, version, method, params)
     }
 
-    suspend fun waitForOpen() {
+    private suspend fun waitForOpen() {
         if (connected.get()) return
         return suspendCoroutine { waiting.add(it) }
     }
 
     // broadcast
     override suspend fun broadcast(method: API, params: JsonArray) : SocketResult {
+        if (method.type != APIType.LOGIN) waitForOpen()
         return suspendCoroutine {
             val struct = BroadcastStruct(method, false, params, it)
-            broadcastScope.launch { broadcast(struct) }
+            broadcast(struct)
         }
     }
     // TODO: 2022/4/12
-    override suspend fun broadcast(struct: BroadcastStruct) {
-        if (struct.method.type != APIType.LOGIN) waitForOpen()
-        sendingChannel.send(struct)
+    override fun broadcast(struct: BroadcastStruct) {
+        broadcastScope.launch {
+            try {
+                sendingChannel.send(struct)
+            } catch (e: Throwable) {
+                struct.cont.resumeWithException(e)
+                struct.cont
+            }
+        }
     }
 
     private fun open() {
         connected.set(true)
         waiting.forEach { it.resume(Unit) }
+        waiting.clear()
         console("================ WEBSOCKET OPEN ================")
     }
 
@@ -122,16 +140,6 @@ class GrapheneClient(val node: Node, var debug: Boolean = false) : Broadcaster, 
             val result = receiveDeserialized<SocketResult>().console("Recv <<<")
             callback(result.id, result)
         }
-//        while (true) {
-//            try {
-//                val result = receiveDeserialized<SocketResult>().console("Recv <<<")
-//                callback(result.id, result)
-//            } catch (e: Exception) {
-//                e.printStackTrace()
-//                e.console("================ WEBSOCKET STOP ================")
-//                break
-//            }
-//        }
     }
 
     private suspend fun launchSocket() {
@@ -142,43 +150,40 @@ class GrapheneClient(val node: Node, var debug: Boolean = false) : Broadcaster, 
             getIdentifiers().let { identifiers.putAll(it) }
             open()
             listOf(sendJob, receiveJob).joinAll()
-//            try {
-//            } catch (e: Throwable) {
-//                e.printStackTrace()
-//            }
         }
     }
 
     // public
     fun start() {
         clientScope.launch {
-            supervisorScope {
+            try {
                 launchSocket()
+            } catch (e: Throwable) {
+                e.printStackTrace()
             }
              // TODO: 2022/4/1 java.net.SocketException: Bad file descriptor
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun stop(reason: Exception = SocketManualStopException()) {
         "STOP() CALLED FROM".console()
-        clientScope.launch {
-            try {
-                sendingChannel.consumeEach {
+        if (!sendingChannel.isClosedForReceive) clientScope.launch {
+            sendingChannel.consumeEach {
+                if (conf.fallback && !fallbackChannel.isClosedForSend) {
                     fallbackChannel.send(it)
+                } else {
+                    runCatching { it.cont.resumeWithException(reason) }
                 }
-                sendingChannel.close(reason)
-//                fallbackChannel.close(reason)
-                session.cancel()
-                waiting.forEach {
-                    it.resumeWithException(reason)
-                }
-                waiting.clear()
-                callbackMap.clear()
-            } catch (e: Throwable) {
-//            e.printStackTrace()
             }
-
         }
+        waiting.forEach {
+            it.resumeWithException(reason)
+        }
+        waiting.clear()
+        callbackMap.clear()
+        "STOP() CALLED FROM".info()
+//        session.cancel()
 
     }
 }
