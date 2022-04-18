@@ -35,8 +35,8 @@ interface DatabaseBroadcaster : Broadcaster {
 interface LoginBroadcaster : Broadcaster {
 
     // login
-    suspend fun login(node: Node): Boolean {
-        return sendForResultOrNull(LoginAPI.LOGIN, node.username, node.password) ?: false
+    suspend fun login(username: String = "", password: String = ""): Boolean {
+        return sendForResultOrNull(LoginAPI.LOGIN, username, password) ?: false
     }
     suspend fun getIdentifiers(): Map<APIType, Int?> {
         return API_TYPE_MAP.map { (type, api) ->

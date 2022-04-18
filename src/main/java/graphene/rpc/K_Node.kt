@@ -1,6 +1,6 @@
 package graphene.rpc
 
-data class Node(
+data class K_Node(
     val name: String,
     val url: String,
     val username: String = "", // TODO: 2022/4/12

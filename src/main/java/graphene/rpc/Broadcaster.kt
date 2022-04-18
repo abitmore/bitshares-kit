@@ -17,7 +17,7 @@ interface AllBroadcaster : LoginBroadcaster, DatabaseBroadcaster
 interface Broadcaster {
     val broadcastScope: CoroutineScope
     suspend fun broadcast(method: API, params: JsonArray) : SocketResult
-    fun broadcast(struct: BroadcastStruct)
+//    fun broadcast(struct: BroadcastStruct)
 }
 
 /* ================================ begin ================================ */

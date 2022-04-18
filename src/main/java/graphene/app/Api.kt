@@ -6,8 +6,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
-class Application
-
 @Serializable
 data class VerifyRangeResult(
     @SerialName("success") val success: Boolean,

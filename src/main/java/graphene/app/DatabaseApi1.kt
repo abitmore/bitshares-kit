@@ -23,7 +23,6 @@ enum class APIType {
     CRYPTO,                 // 0x07
     ASSET,                  // 0x08
     ORDERS;                 // 0x09
-
 }
 
 
